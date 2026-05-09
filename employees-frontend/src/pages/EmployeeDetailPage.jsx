@@ -210,7 +210,7 @@ export default function EmployeeDetailPage() {
   ];
 
   return (
-    <div style={s.page}>
+    <div className="employee-detail-page" style={s.page}>
       <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap');
                 @keyframes spin    { to { transform: rotate(360deg); } }
@@ -218,12 +218,106 @@ export default function EmployeeDetailPage() {
                 .edit-btn:hover  { transform:translateY(-1px); box-shadow:0 8px 24px rgba(37,99,235,0.35) !important; }
                 .del-btn:hover   { transform:translateY(-1px); box-shadow:0 8px 24px rgba(220,38,38,0.25) !important; }
                 .info-row:hover  { background:#f8fafc !important; }
+                .employee-detail-page,
+                .employee-detail-page * { box-sizing: border-box; }
+                @media (max-width: 920px) {
+                    .employee-detail-main { padding: 32px 24px !important; }
+                    .employee-detail-layout {
+                        grid-template-columns: 1fr !important;
+                    }
+                    .employee-profile-card {
+                        max-width: 520px !important;
+                        width: 100% !important;
+                        margin: 0 auto !important;
+                    }
+                }
+                @media (max-width: 640px) {
+                    .employee-detail-main { padding: 28px 18px !important; }
+                    .employee-detail-back {
+                        width: 100% !important;
+                        justify-content: center !important;
+                        margin-bottom: 18px !important;
+                    }
+                    .employee-profile-card,
+                    .employee-info-card {
+                        border-radius: 16px !important;
+                    }
+                    .employee-cover { height: 104px !important; }
+                    .employee-avatar {
+                        width: 112px !important;
+                        height: 112px !important;
+                        margin-top: -56px !important;
+                        border-radius: 24px !important;
+                    }
+                    .employee-avatar img,
+                    .employee-avatar > div:first-child {
+                        border-radius: 18px !important;
+                    }
+                    .employee-profile-body {
+                        padding: 16px 18px 22px !important;
+                    }
+                    .employee-profile-name {
+                        font-size: 17px !important;
+                    }
+                    .employee-position-badge {
+                        white-space: normal !important;
+                        line-height: 1.6 !important;
+                    }
+                    .employee-id-badge {
+                        align-items: flex-start !important;
+                        flex-direction: column !important;
+                        gap: 4px !important;
+                    }
+                    .employee-quick-stat-value {
+                        font-size: 16px !important;
+                        overflow-wrap: anywhere !important;
+                    }
+                    .employee-actions {
+                        gap: 8px !important;
+                    }
+                    .employee-info-header {
+                        align-items: flex-start !important;
+                        flex-direction: column !important;
+                        gap: 10px !important;
+                        padding: 18px !important;
+                    }
+                    .employee-info-row {
+                        align-items: flex-start !important;
+                        padding: 16px 18px !important;
+                        gap: 12px !important;
+                    }
+                    .employee-info-icon {
+                        width: 40px !important;
+                        height: 40px !important;
+                    }
+                    .employee-info-value {
+                        font-size: 14px !important;
+                        overflow-wrap: anywhere !important;
+                        word-break: break-word !important;
+                    }
+                    .employee-toast {
+                        width: calc(100% - 32px) !important;
+                        text-align: center !important;
+                    }
+                }
+                @media (max-width: 380px) {
+                    .employee-detail-main { padding: 24px 14px !important; }
+                    .employee-quick-stats {
+                        flex-direction: column !important;
+                    }
+                    .employee-q-divider {
+                        width: auto !important;
+                        height: 1px !important;
+                        margin: 0 12px !important;
+                    }
+                }
             `}</style>
 
       <Navbar />
 
       {toast && (
         <div
+          className="employee-toast"
           style={{
             ...s.toast,
             background: toast.type === "error" ? "#fef2f2" : "#ecfdf5",
@@ -243,9 +337,9 @@ export default function EmployeeDetailPage() {
         onConfirm={confirmDelete}
       />
 
-      <main style={s.main}>
+      <main className="employee-detail-main" style={s.main}>
         {/* Back */}
-        <button style={s.backBtn} onClick={() => navigate("/employees")}>
+        <button className="employee-detail-back" style={s.backBtn} onClick={() => navigate("/employees")}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
             <path
               d="M19 12H5M12 19l-7-7 7-7"
@@ -258,14 +352,14 @@ export default function EmployeeDetailPage() {
           العودة للقائمة
         </button>
 
-        <div style={s.layout}>
+        <div className="employee-detail-layout" style={s.layout}>
           {/* Left: Profile card */}
-          <div style={s.profileCard}>
+          <div className="employee-profile-card" style={s.profileCard}>
             {/* Cover */}
-            <div style={s.cover} />
+            <div className="employee-cover" style={s.cover} />
 
             {/* Avatar */}
-            <div style={s.avatarWrap}>
+            <div className="employee-avatar" style={s.avatarWrap}>
               {employee.image ? (
                 <img
                   src={`http://127.0.0.1:8000/storage/${employee.image}`}
@@ -278,24 +372,30 @@ export default function EmployeeDetailPage() {
               <div style={s.onlineDot} />
             </div>
 
-            <div style={s.profileBody}>
-              <h2 style={s.profileName}>{employee.name}</h2>
-              <span style={s.positionBadge}>{employee.position}</span>
+            <div className="employee-profile-body" style={s.profileBody}>
+              <h2 className="employee-profile-name" style={s.profileName}>
+                {employee.name}
+              </h2>
+              <span className="employee-position-badge" style={s.positionBadge}>
+                {employee.position}
+              </span>
 
-              <div style={s.idBadge}>
+              <div className="employee-id-badge" style={s.idBadge}>
                 <span style={s.idLabel}>رقم الموظف</span>
                 <span style={s.idVal}>#{String(employee.id).padStart(4, "0")}</span>
               </div>
 
               {/* Quick stats */}
-              <div style={s.quickStats}>
+              <div className="employee-quick-stats" style={s.quickStats}>
                 <div style={s.qStat}>
-                  <p style={s.qStatVal}>{parseFloat(employee.salary).toLocaleString()}</p>
+                  <p className="employee-quick-stat-value" style={s.qStatVal}>
+                    {parseFloat(employee.salary).toLocaleString()}
+                  </p>
                   <p style={s.qStatLabel}>الراتب ل.س</p>
                 </div>
-                <div style={s.qDivider} />
+                <div className="employee-q-divider" style={s.qDivider} />
                 <div style={s.qStat}>
-                  <p style={s.qStatVal}>
+                  <p className="employee-quick-stat-value" style={s.qStatVal}>
                     {Math.floor(
                       (new Date() - new Date(employee.hire_date)) / (1000 * 60 * 60 * 24 * 30),
                     )}
@@ -305,7 +405,7 @@ export default function EmployeeDetailPage() {
               </div>
 
               {/* Actions */}
-              <div style={s.profileActions}>
+              <div className="employee-actions" style={s.profileActions}>
                 <button
                   className="edit-btn"
                   style={s.editBtn}
@@ -360,8 +460,8 @@ export default function EmployeeDetailPage() {
           </div>
 
           {/* Right: Info card */}
-          <div style={s.infoCard}>
-            <div style={s.infoHeader}>
+          <div className="employee-info-card" style={s.infoCard}>
+            <div className="employee-info-header" style={s.infoHeader}>
               <h3 style={s.infoTitle}>تفاصيل الموظف</h3>
               <span style={s.infoBadge}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
@@ -387,17 +487,20 @@ export default function EmployeeDetailPage() {
               {infoRows.map((row, i) => (
                 <div
                   key={i}
-                  className="info-row"
+                  className="info-row employee-info-row"
                   style={{
                     ...s.infoRow,
                     animationDelay: `${i * 0.06}s`,
                     borderBottom: i < infoRows.length - 1 ? "1px solid #f1f5f9" : "none",
                   }}
                 >
-                  <div style={{ ...s.infoIconWrap, background: row.bg }}>{row.icon}</div>
+                  <div className="employee-info-icon" style={{ ...s.infoIconWrap, background: row.bg }}>
+                    {row.icon}
+                  </div>
                   <div style={s.infoContent}>
                     <p style={s.infoLabel}>{row.label}</p>
                     <p
+                      className="employee-info-value"
                       style={{
                         ...s.infoValue,
                         color: row.bold ? row.color : "#0f172a",

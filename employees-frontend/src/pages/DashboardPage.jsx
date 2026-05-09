@@ -126,7 +126,7 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div style={s.page}>
+    <div className="dashboard-page" style={s.page}>
       <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap');
                 @keyframes fadeUp {
@@ -136,18 +136,94 @@ export default function DashboardPage() {
                 .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.08) !important; }
                 .emp-row:hover { background: #f8fafc !important; }
                 .quick-btn:hover { border-color: #2563eb !important; color: #2563eb !important; background: #eff6ff !important; }
+                .dashboard-page,
+                .dashboard-page * { box-sizing: border-box; }
+                @media (max-width: 1100px) {
+                    .dashboard-stats { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+                    .dashboard-bottom { grid-template-columns: 1fr !important; }
+                }
+                @media (max-width: 760px) {
+                    .dashboard-main { padding: 28px 18px !important; }
+                    .dashboard-header {
+                        align-items: stretch !important;
+                        flex-direction: column !important;
+                        gap: 16px !important;
+                        margin-bottom: 24px !important;
+                    }
+                    .dashboard-title { font-size: 23px !important; }
+                    .dashboard-add-btn {
+                        width: 100% !important;
+                        justify-content: center !important;
+                    }
+                    .dashboard-stats {
+                        grid-template-columns: 1fr !important;
+                        gap: 12px !important;
+                        margin-bottom: 18px !important;
+                    }
+                    .dashboard-stat-card {
+                        padding: 18px !important;
+                    }
+                    .dashboard-stat-value {
+                        font-size: 22px !important;
+                        overflow-wrap: anywhere !important;
+                    }
+                    .dashboard-bottom { gap: 16px !important; }
+                    .dashboard-table-header {
+                        align-items: stretch !important;
+                        flex-direction: column !important;
+                        gap: 12px !important;
+                        padding: 18px !important;
+                    }
+                    .dashboard-view-all {
+                        justify-content: center !important;
+                        width: 100% !important;
+                        padding: 10px !important;
+                        border-radius: 10px !important;
+                        background: #eff6ff !important;
+                    }
+                    .dashboard-section-title { font-size: 15px !important; }
+                    .dashboard-table-scroll {
+                        overflow-x: auto !important;
+                        -webkit-overflow-scrolling: touch !important;
+                    }
+                    .dashboard-table {
+                        min-width: 680px !important;
+                    }
+                    .dashboard-quick-card {
+                        padding: 18px !important;
+                    }
+                    .dashboard-quick-btn {
+                        padding: 13px !important;
+                    }
+                }
+                @media (max-width: 420px) {
+                    .dashboard-main { padding: 24px 14px !important; }
+                    .dashboard-stat-card {
+                        align-items: flex-start !important;
+                        gap: 12px !important;
+                    }
+                    .dashboard-stat-icon {
+                        width: 46px !important;
+                        height: 46px !important;
+                    }
+                    .dashboard-quick-sub {
+                        display: none !important;
+                    }
+                }
             `}</style>
 
       <Navbar />
 
-      <main style={s.main}>
+      <main className="dashboard-main" style={s.main}>
         {/* Header */}
-        <div style={s.header}>
+        <div className="dashboard-header" style={s.header}>
           <div>
-            <h1 style={s.pageTitle}>لوحة التحكم</h1>
+            <h1 className="dashboard-title" style={s.pageTitle}>
+              لوحة التحكم
+            </h1>
             <p style={s.pageSub}>مرحباً بك — هذا ملخص النظام</p>
           </div>
-          <button style={s.addBtn} onClick={() => navigate("/employees/add")}>
+          <button className="dashboard-add-btn" style={s.addBtn} onClick={() => navigate("/employees/add")}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
               <line
                 x1="12"
@@ -173,29 +249,35 @@ export default function DashboardPage() {
         </div>
 
         {/* Stats */}
-        <div style={s.statsGrid}>
+        <div className="dashboard-stats" style={s.statsGrid}>
           {stats.map((st, i) => (
             <div
               key={i}
-              className="stat-card"
+              className="stat-card dashboard-stat-card"
               style={{ ...s.statCard, animationDelay: `${i * 0.07}s` }}
             >
-              <div style={{ ...s.statIconWrap, background: st.bg }}>{st.icon}</div>
+              <div className="dashboard-stat-icon" style={{ ...s.statIconWrap, background: st.bg }}>
+                {st.icon}
+              </div>
               <div style={s.statRight}>
                 <p style={s.statLabel}>{st.label}</p>
-                <p style={{ ...s.statValue, color: st.color }}>{st.value}</p>
+                <p className="dashboard-stat-value" style={{ ...s.statValue, color: st.color }}>
+                  {st.value}
+                </p>
                 <p style={s.statSub}>{st.sub}</p>
               </div>
             </div>
           ))}
         </div>
 
-        <div style={s.bottom}>
+        <div className="dashboard-bottom" style={s.bottom}>
           {/* Recent employees */}
           <div style={s.tableCard}>
-            <div style={s.tableHeader}>
-              <h2 style={s.sectionTitle}>آخر الموظفين المضافين</h2>
-              <button style={s.viewAll} onClick={() => navigate("/employees")}>
+            <div className="dashboard-table-header" style={s.tableHeader}>
+              <h2 className="dashboard-section-title" style={s.sectionTitle}>
+                آخر الموظفين المضافين
+              </h2>
+              <button className="dashboard-view-all" style={s.viewAll} onClick={() => navigate("/employees")}>
                 عرض الكل
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                   <path
@@ -213,63 +295,75 @@ export default function DashboardPage() {
             ) : employees.length === 0 ? (
               <div style={s.emptyState}>لا يوجد موظفون بعد</div>
             ) : (
-              <table style={s.table}>
-                <thead>
-                  <tr style={s.thead}>
-                    <th style={s.th}>الاسم</th>
-                    <th style={s.th}>المسمى</th>
-                    <th style={s.th}>الراتب</th>
-                    <th style={s.th}>تاريخ التعيين</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {latest.map((emp, i) => (
-                    <tr
-                      key={emp.id}
-                      className="emp-row"
-                      style={s.tr}
-                      onClick={() => navigate(`/employees/${emp.id}`)}
-                    >
-                      <td style={s.td}>
-                        <div style={s.empName}>
-                          <div
-                            style={{
-                              ...s.avatar,
-                              background: ["#eff6ff", "#f5f3ff", "#ecfdf5", "#fffbeb", "#fef2f2"][
-                                i % 5
-                              ],
-                              color: ["#2563eb", "#7c3aed", "#059669", "#d97706", "#dc2626"][i % 5],
-                            }}
-                          >
-                            {emp.name?.charAt(0)}
-                          </div>
-                          <div>
-                            <p style={s.empNameText}>{emp.name}</p>
-                            <p style={s.empEmail}>{emp.email}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td style={s.td}>
-                        <span style={s.positionBadge}>{emp.position}</span>
-                      </td>
-                      <td style={s.td}>
-                        <span style={s.salary}>{parseFloat(emp.salary).toLocaleString()} ل.س</span>
-                      </td>
-                      <td style={s.td}>
-                        <span style={s.date}>
-                          {new Date(emp.hire_date).toLocaleDateString("en-GB")}
-                        </span>
-                      </td>
+              <div className="dashboard-table-scroll" style={s.tableScroll}>
+                <table className="dashboard-table" style={s.table}>
+                  <thead>
+                    <tr style={s.thead}>
+                      <th style={s.th}>الاسم</th>
+                      <th style={s.th}>المسمى</th>
+                      <th style={s.th}>الراتب</th>
+                      <th style={s.th}>تاريخ التعيين</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {latest.map((emp, i) => (
+                      <tr
+                        key={emp.id}
+                        className="emp-row"
+                        style={s.tr}
+                        onClick={() => navigate(`/employees/${emp.id}`)}
+                      >
+                        <td style={s.td}>
+                          <div style={s.empName}>
+                            <div
+                              style={{
+                                ...s.avatar,
+                                background: [
+                                  "#eff6ff",
+                                  "#f5f3ff",
+                                  "#ecfdf5",
+                                  "#fffbeb",
+                                  "#fef2f2",
+                                ][i % 5],
+                                color: ["#2563eb", "#7c3aed", "#059669", "#d97706", "#dc2626"][
+                                  i % 5
+                                ],
+                              }}
+                            >
+                              {emp.name?.charAt(0)}
+                            </div>
+                            <div>
+                              <p style={s.empNameText}>{emp.name}</p>
+                              <p style={s.empEmail}>{emp.email}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td style={s.td}>
+                          <span style={s.positionBadge}>{emp.position}</span>
+                        </td>
+                        <td style={s.td}>
+                          <span style={s.salary}>
+                            {parseFloat(emp.salary).toLocaleString()} ل.س
+                          </span>
+                        </td>
+                        <td style={s.td}>
+                          <span style={s.date}>
+                            {new Date(emp.hire_date).toLocaleDateString("en-GB")}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
 
           {/* Quick actions */}
-          <div style={s.quickCard}>
-            <h2 style={s.sectionTitle}>إجراءات سريعة</h2>
+          <div className="dashboard-quick-card" style={s.quickCard}>
+            <h2 className="dashboard-section-title" style={s.sectionTitle}>
+              إجراءات سريعة
+            </h2>
             <div style={s.quickList}>
               {[
                 {
@@ -348,14 +442,16 @@ export default function DashboardPage() {
               ].map((q, i) => (
                 <button
                   key={i}
-                  className="quick-btn"
+                  className="quick-btn dashboard-quick-btn"
                   style={s.quickBtn}
                   onClick={() => navigate(q.path)}
                 >
                   <div style={s.quickIcon}>{q.icon}</div>
                   <div style={s.quickText}>
                     <p style={s.quickLabel}>{q.label}</p>
-                    <p style={s.quickSub}>{q.sub}</p>
+                    <p className="dashboard-quick-sub" style={s.quickSub}>
+                      {q.sub}
+                    </p>
                   </div>
                   <svg
                     width="14"
@@ -471,6 +567,7 @@ const s = {
     cursor: "pointer",
     fontFamily: "'Cairo', sans-serif",
   },
+  tableScroll: { width: "100%", overflowX: "visible" },
   table: { width: "100%", borderCollapse: "collapse" },
   thead: { background: "#f8fafc" },
   th: {

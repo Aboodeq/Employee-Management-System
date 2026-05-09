@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/authContextValue";
 
 export default function Navbar() {
   const navigate = useNavigate();
   const { logout } = useAuth();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -11,24 +13,152 @@ export default function Navbar() {
   };
 
   return (
-    <nav style={s.nav}>
-      <div style={s.inner}>
-        <div style={s.brand}>
-          <span style={s.logo}>EMS</span>
-          <div>
-            <p style={s.title}>نظام إدارة الموظفين</p>
-            <p style={s.subtitle}>لوحة المدير</p>
+    <nav className="app-nav" style={s.nav}>
+      <style>{`
+        .app-nav,
+        .app-nav * {
+          box-sizing: border-box;
+        }
+        .app-nav-menu-btn {
+          display: none;
+        }
+        @media (max-width: 760px) {
+          .app-nav-inner {
+            align-items: stretch !important;
+            flex-direction: column !important;
+            gap: 12px !important;
+            padding: 12px 18px !important;
+          }
+          .app-nav-top {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            gap: 12px !important;
+            width: 100% !important;
+          }
+          .app-nav-title {
+            white-space: normal !important;
+            font-size: 14px !important;
+          }
+          .app-nav-menu-btn {
+            display: inline-flex !important;
+          }
+          .app-nav-links {
+            display: none !important;
+            width: 100% !important;
+            grid-template-columns: 1fr !important;
+            gap: 8px !important;
+            padding-top: 10px !important;
+            border-top: 1px solid #f1f5f9 !important;
+          }
+          .app-nav-links.is-open {
+            display: grid !important;
+          }
+          .app-nav-link,
+          .app-nav-logout {
+            width: 100% !important;
+            justify-content: center !important;
+            text-align: center !important;
+          }
+        }
+      `}</style>
+
+      <div className="app-nav-inner" style={s.inner}>
+        <div className="app-nav-top" style={s.topRow}>
+          <div style={s.brand}>
+            <span style={s.logo}>EMS</span>
+            <div>
+              <p className="app-nav-title" style={s.title}>
+                نظام إدارة الموظفين
+              </p>
+              <p style={s.subtitle}>لوحة المدير</p>
+            </div>
           </div>
+
+          <button
+            type="button"
+            className="app-nav-menu-btn"
+            style={s.menuBtn}
+            aria-label="فتح القائمة"
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((open) => !open)}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              {menuOpen ? (
+                <>
+                  <line
+                    x1="18"
+                    y1="6"
+                    x2="6"
+                    y2="18"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                  />
+                  <line
+                    x1="6"
+                    y1="6"
+                    x2="18"
+                    y2="18"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                  />
+                </>
+              ) : (
+                <>
+                  <line
+                    x1="4"
+                    y1="7"
+                    x2="20"
+                    y2="7"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                  />
+                  <line
+                    x1="4"
+                    y1="12"
+                    x2="20"
+                    y2="12"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                  />
+                  <line
+                    x1="4"
+                    y1="17"
+                    x2="20"
+                    y2="17"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                  />
+                </>
+              )}
+            </svg>
+          </button>
         </div>
 
-        <div style={s.links}>
-          <NavLink to="/" end style={({ isActive }) => linkStyle(isActive)}>
+        <div className={`app-nav-links${menuOpen ? " is-open" : ""}`} style={s.links}>
+          <NavLink
+            className="app-nav-link"
+            to="/"
+            end
+            style={({ isActive }) => linkStyle(isActive)}
+            onClick={() => setMenuOpen(false)}
+          >
             لوحة التحكم
           </NavLink>
-          <NavLink to="/employees" style={({ isActive }) => linkStyle(isActive)}>
+          <NavLink
+            className="app-nav-link"
+            to="/employees"
+            style={({ isActive }) => linkStyle(isActive)}
+            onClick={() => setMenuOpen(false)}
+          >
             الموظفون
           </NavLink>
-          <button type="button" style={s.logout} onClick={handleLogout}>
+          <button type="button" className="app-nav-logout" style={s.logout} onClick={handleLogout}>
             تسجيل الخروج
           </button>
         </div>
@@ -60,6 +190,9 @@ const s = {
     alignItems: "center",
     justifyContent: "space-between",
     gap: "24px",
+  },
+  topRow: {
+    display: "contents",
   },
   brand: {
     display: "flex",
@@ -101,6 +234,9 @@ const s = {
     flexWrap: "wrap",
   },
   link: {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
     color: "#475569",
     background: "transparent",
     border: "1px solid transparent",
@@ -116,6 +252,9 @@ const s = {
     borderColor: "#dbeafe",
   },
   logout: {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
     color: "#dc2626",
     background: "#fef2f2",
     border: "1px solid #fee2e2",
@@ -125,5 +264,17 @@ const s = {
     fontWeight: "700",
     cursor: "pointer",
     fontFamily: "'Cairo', sans-serif",
+  },
+  menuBtn: {
+    width: "42px",
+    height: "42px",
+    borderRadius: "12px",
+    border: "1px solid #e2e8f0",
+    background: "#fff",
+    color: "#475569",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
+    flexShrink: 0,
   },
 };

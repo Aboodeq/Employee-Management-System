@@ -250,7 +250,7 @@ export default function EditEmployeePage() {
     );
 
   return (
-    <div style={s.page}>
+    <div className="employee-form-page" style={s.page}>
       <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap');
                 @keyframes spin { to { transform: rotate(360deg); } }
@@ -259,12 +259,67 @@ export default function EditEmployeePage() {
                 .submit-btn:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 8px 28px rgba(37,99,235,0.4) !important; }
                 .cancel-btn:hover { background:#f1f5f9 !important; }
                 .upload-zone:hover { border-color:#2563eb !important; background:#eff6ff !important; }
+                .employee-form-page,
+                .employee-form-page * { box-sizing: border-box; }
+                @media (max-width: 940px) {
+                    .employee-form-main { padding: 32px 24px !important; }
+                    .employee-form-layout { grid-template-columns: 1fr !important; }
+                    .employee-form-side { order: -1 !important; }
+                    .employee-form-upload { min-height: 220px !important; }
+                    .employee-form-preview { height: 220px !important; }
+                }
+                @media (max-width: 680px) {
+                    .employee-form-main { padding: 28px 18px !important; }
+                    .employee-form-header {
+                        align-items: stretch !important;
+                        flex-direction: column !important;
+                        gap: 14px !important;
+                        margin-bottom: 22px !important;
+                    }
+                    .employee-form-back {
+                        width: 100% !important;
+                        justify-content: center !important;
+                    }
+                    .employee-form-title { font-size: 22px !important; }
+                    .employee-form-card,
+                    .employee-form-side {
+                        border-radius: 16px !important;
+                        padding: 20px !important;
+                    }
+                    .employee-form-fields {
+                        grid-template-columns: 1fr !important;
+                        gap: 16px !important;
+                    }
+                    .employee-form-actions {
+                        flex-direction: column !important;
+                        gap: 10px !important;
+                    }
+                    .employee-form-submit,
+                    .employee-form-cancel {
+                        width: 100% !important;
+                        justify-content: center !important;
+                    }
+                    .employee-form-toast {
+                        width: calc(100% - 32px) !important;
+                        text-align: center !important;
+                        justify-content: center !important;
+                    }
+                    .employee-form-upload { min-height: 180px !important; }
+                    .employee-form-preview { height: 180px !important; }
+                }
+                @media (max-width: 380px) {
+                    .employee-form-main { padding: 24px 14px !important; }
+                    .employee-form-card,
+                    .employee-form-side { padding: 16px !important; }
+                    .employee-form-input { font-size: 13px !important; }
+                }
             `}</style>
 
       <Navbar />
 
       {toast && (
         <div
+          className="employee-form-toast"
           style={{
             ...s.toast,
             background: toast.type === "error" ? "#fef2f2" : "#ecfdf5",
@@ -276,9 +331,9 @@ export default function EditEmployeePage() {
         </div>
       )}
 
-      <main style={s.main}>
-        <div style={s.header}>
-          <button style={s.backBtn} onClick={() => navigate(`/employees/${id}`)}>
+      <main className="employee-form-main" style={s.main}>
+        <div className="employee-form-header" style={s.header}>
+          <button className="employee-form-back" style={s.backBtn} onClick={() => navigate(`/employees/${id}`)}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
               <path
                 d="M19 12H5M12 19l-7-7 7-7"
@@ -291,22 +346,24 @@ export default function EditEmployeePage() {
             رجوع
           </button>
           <div>
-            <h1 style={s.pageTitle}>تعديل بيانات الموظف</h1>
+            <h1 className="employee-form-title" style={s.pageTitle}>
+              تعديل بيانات الموظف
+            </h1>
             <p style={s.pageSub}>قم بتعديل البيانات ثم احفظ التغييرات</p>
           </div>
         </div>
 
-        <div style={s.layout}>
-          <div style={s.formCard}>
+        <div className="employee-form-layout" style={s.layout}>
+          <div className="employee-form-card" style={s.formCard}>
             <form onSubmit={handleSubmit} style={s.form} noValidate>
-              <div style={s.fieldsGrid}>
+              <div className="employee-form-fields" style={s.fieldsGrid}>
                 {fields.map((f) => (
                   <div key={f.name} style={s.field}>
                     <label style={s.label}>{f.label}</label>
                     <div style={s.inputWrap}>
                       <span style={s.inputIco}>{f.icon}</span>
                       <input
-                        className={`form-input${errors[f.name] ? " error" : ""}`}
+                        className={`form-input employee-form-input${errors[f.name] ? " error" : ""}`}
                         style={s.input}
                         type={f.type}
                         name={f.name}
@@ -331,10 +388,10 @@ export default function EditEmployeePage() {
                 ))}
               </div>
 
-              <div style={s.actions}>
+              <div className="employee-form-actions" style={s.actions}>
                 <button
                   type="submit"
-                  className="submit-btn"
+                  className="submit-btn employee-form-submit"
                   style={{ ...s.submitBtn, opacity: loading ? 0.75 : 1 }}
                   disabled={loading}
                 >
@@ -371,7 +428,7 @@ export default function EditEmployeePage() {
                 </button>
                 <button
                   type="button"
-                  className="cancel-btn"
+                  className="cancel-btn employee-form-cancel"
                   style={s.cancelBtn}
                   onClick={() => navigate(`/employees/${id}`)}
                 >
@@ -382,12 +439,12 @@ export default function EditEmployeePage() {
           </div>
 
           {/* Image */}
-          <div style={s.sideCard}>
+          <div className="employee-form-side" style={s.sideCard}>
             <h3 style={s.sideTitle}>صورة الموظف</h3>
             <p style={s.sideSub}>اختياري — يمكنك تغييرها</p>
-            <label className="upload-zone" style={s.uploadZone}>
+            <label className="upload-zone employee-form-upload" style={s.uploadZone}>
               {preview ? (
-                <img src={preview} alt="preview" style={s.previewImg} />
+                <img className="employee-form-preview" src={preview} alt="preview" style={s.previewImg} />
               ) : (
                 <div style={s.uploadPlaceholder}>
                   <div style={s.uploadIcon}>

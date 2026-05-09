@@ -128,32 +128,174 @@ export default function LoginPage() {
                 .login-btn:active:not(:disabled) {
                     transform: translateY(0);
                 }
+                .login-page {
+                    overflow-x: hidden;
+                }
+                .login-page,
+                .login-page * {
+                    box-sizing: border-box;
+                }
+                @media (max-width: 1180px) {
+                    .login-hero {
+                        padding: 52px 36px !important;
+                    }
+                    .login-hero-inner {
+                        max-width: 460px !important;
+                        gap: 30px !important;
+                    }
+                    .login-hero-title {
+                        font-size: 38px !important;
+                    }
+                    .login-form-wrap {
+                        padding: 72px clamp(40px, 6vw, 86px) !important;
+                    }
+                }
+                @media (max-width: 980px) {
+                    .login-page {
+                        min-height: auto !important;
+                        flex-direction: column !important;
+                    }
+                    .login-form-panel {
+                        order: 1 !important;
+                        min-height: auto !important;
+                    }
+                    .login-form-wrap {
+                        min-height: auto !important;
+                        padding: 56px clamp(28px, 8vw, 80px) !important;
+                    }
+                    .login-hero {
+                        order: 2 !important;
+                        min-height: auto !important;
+                        padding: 48px clamp(28px, 8vw, 80px) !important;
+                    }
+                    .login-hero-inner {
+                        max-width: 760px !important;
+                        gap: 26px !important;
+                    }
+                    .login-hero-title {
+                        font-size: 34px !important;
+                    }
+                    .login-hero-sub {
+                        max-width: 620px !important;
+                    }
+                    .login-features {
+                        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                    }
+                }
+                @media (max-width: 640px) {
+                    .login-form-wrap {
+                        padding: 36px 20px 30px !important;
+                    }
+                    .login-form-header {
+                        margin-bottom: 30px !important;
+                    }
+                    .login-form-title {
+                        font-size: 22px !important;
+                    }
+                    .login-form-sub {
+                        font-size: 12px !important;
+                    }
+                    .login-form-icon {
+                        width: 46px !important;
+                        height: 46px !important;
+                    }
+                    .login-form {
+                        gap: 20px !important;
+                    }
+                    .login-input {
+                        min-height: 50px !important;
+                        font-size: 14px !important;
+                    }
+                    .login-options {
+                        align-items: flex-start !important;
+                        flex-direction: column !important;
+                        gap: 10px !important;
+                    }
+                    .login-forgot {
+                        align-self: flex-start !important;
+                    }
+                    .login-btn {
+                        padding: 15px !important;
+                        font-size: 15px !important;
+                    }
+                    .login-hero {
+                        padding: 34px 20px !important;
+                    }
+                    .login-hero-inner {
+                        gap: 22px !important;
+                    }
+                    .login-brand {
+                        align-items: flex-start !important;
+                    }
+                    .login-brand-name {
+                        font-size: 11px !important;
+                        line-height: 1.6 !important;
+                    }
+                    .login-hero-title {
+                        font-size: 30px !important;
+                        line-height: 1.25 !important;
+                    }
+                    .login-hero-sub {
+                        font-size: 13px !important;
+                        line-height: 1.8 !important;
+                    }
+                    .login-features {
+                        grid-template-columns: 1fr !important;
+                    }
+                    .login-feature-card {
+                        padding: 14px !important;
+                    }
+                    .login-bottom-tag {
+                        font-size: 10px !important;
+                        line-height: 1.7 !important;
+                        word-break: break-word !important;
+                    }
+                }
+                @media (max-width: 380px) {
+                    .login-form-wrap,
+                    .login-hero {
+                        padding-left: 16px !important;
+                        padding-right: 16px !important;
+                    }
+                    .login-form-header {
+                        gap: 10px !important;
+                    }
+                    .login-hero-title {
+                        font-size: 26px !important;
+                    }
+                }
             `}</style>
 
-      <div style={s.page}>
+      <div className="login-page" style={s.page}>
         {/* ===== RIGHT: Colored panel ===== */}
-        <div style={s.right}>
-          <div style={s.rightInner}>
-            <div style={s.brandRow}>
+        <div className="login-hero" style={s.right}>
+          <div className="login-hero-inner" style={s.rightInner}>
+            <div className="login-brand" style={s.brandRow}>
               <div style={s.brandDot} />
-              <span style={s.brandName}>EMS — Employee Management System</span>
+              <span className="login-brand-name" style={s.brandName}>
+                EMS — Employee Management System
+              </span>
             </div>
 
             <div style={s.heroBlock}>
-              <h1 style={s.heroTitle}>
+              <h1 className="login-hero-title" style={s.heroTitle}>
                 أدِر فريقك
                 <br />
                 باحترافية كاملة
               </h1>
-              <p style={s.heroSub}>
+              <p className="login-hero-sub" style={s.heroSub}>
                 منصة متكاملة تجمع كل ما تحتاجه لإدارة موظفيك في مكان واحد — من بيانات التوظيف إلى
                 الرواتب والمسميات.
               </p>
             </div>
 
-            <div style={s.featuresGrid}>
+            <div className="login-features" style={s.featuresGrid}>
               {features.map((f, i) => (
-                <div key={i} style={{ ...s.featureCard, animationDelay: `${i * 0.08}s` }}>
+                <div
+                  className="login-feature-card"
+                  key={i}
+                  style={{ ...s.featureCard, animationDelay: `${i * 0.08}s` }}
+                >
                   <div style={s.featureIcon}>{f.icon}</div>
                   <div>
                     <p style={s.featureTitle}>{f.title}</p>
@@ -163,7 +305,9 @@ export default function LoginPage() {
               ))}
             </div>
 
-            <div style={s.bottomTag}>Laravel + React · CRUD Operations · REST API</div>
+            <div className="login-bottom-tag" style={s.bottomTag}>
+              Laravel + React · CRUD Operations · REST API
+            </div>
           </div>
 
           {/* Decorative blobs */}
@@ -176,10 +320,10 @@ export default function LoginPage() {
         </div>
 
         {/* ===== LEFT: Form panel ===== */}
-        <div style={s.left}>
-          <div style={s.formWrap}>
-            <div style={s.formHeader}>
-              <div style={s.formIconWrap}>
+        <div className="login-form-panel" style={s.left}>
+          <div className="login-form-wrap" style={s.formWrap}>
+            <div className="login-form-header" style={s.formHeader}>
+              <div className="login-form-icon" style={s.formIconWrap}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                   <rect x="3" y="11" width="18" height="11" rx="2" stroke="#fff" strokeWidth="2" />
                   <path
@@ -191,12 +335,16 @@ export default function LoginPage() {
                 </svg>
               </div>
               <div>
-                <h2 style={s.formTitle}>تسجيل الدخول</h2>
-                <p style={s.formSub}>مخصص للمدير فقط</p>
+                <h2 className="login-form-title" style={s.formTitle}>
+                  تسجيل الدخول
+                </h2>
+                <p className="login-form-sub" style={s.formSub}>
+                  مخصص للمدير فقط
+                </p>
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} style={s.form}>
+            <form className="login-form" onSubmit={handleSubmit} style={s.form}>
               {/* Username */}
               <div style={s.field}>
                 <label style={s.label}>اسم المستخدم</label>
@@ -291,7 +439,7 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              <div style={s.formOptions}>
+              <div className="login-options" style={s.formOptions}>
                 <label style={s.rememberLabel}>
                   <input
                     type="checkbox"
@@ -303,6 +451,7 @@ export default function LoginPage() {
                 </label>
 
                 <button
+                  className="login-forgot"
                   type="button"
                   style={s.forgotBtn}
                   onClick={() => {

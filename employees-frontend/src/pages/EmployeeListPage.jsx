@@ -162,7 +162,7 @@ export default function EmployeeListPage() {
   ];
 
   return (
-    <div style={s.page}>
+    <div className="employees-page" style={s.page}>
       <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap');
                 @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
@@ -171,12 +171,68 @@ export default function EmployeeListPage() {
                 .emp-card:hover { transform:translateY(-3px); box-shadow:0 12px 36px rgba(0,0,0,0.09) !important; }
                 .action-btn:hover { opacity:0.8; }
                 .search-input:focus { border-color:#2563eb !important; box-shadow:0 0 0 3px rgba(37,99,235,0.1) !important; background:#fff !important; }
+                .employees-page,
+                .employees-page * { box-sizing: border-box; }
+                @media (max-width: 980px) {
+                    .employees-main { padding: 32px 24px !important; }
+                    .employees-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+                    .employees-filters { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+                    .employees-clear-filters { grid-column: 1 / -1 !important; }
+                }
+                @media (max-width: 700px) {
+                    .employees-main { padding: 28px 18px !important; }
+                    .employees-header {
+                        align-items: stretch !important;
+                        flex-direction: column !important;
+                        gap: 16px !important;
+                    }
+                    .employees-title { font-size: 23px !important; }
+                    .employees-add-btn {
+                        width: 100% !important;
+                        justify-content: center !important;
+                    }
+                    .employees-search { max-width: none !important; width: 100% !important; }
+                    .employees-filters { grid-template-columns: 1fr !important; gap: 10px !important; }
+                    .employees-grid { grid-template-columns: minmax(0, 1fr) !important; gap: 14px !important; }
+                    .employees-card { padding: 18px !important; border-radius: 14px !important; }
+                    .employees-card-top { gap: 12px !important; margin-bottom: 14px !important; }
+                    .employees-avatar { width: 56px !important; height: 56px !important; border-radius: 16px !important; }
+                    .employees-avatar img,
+                    .employees-avatar > div { border-radius: 12px !important; }
+                    .employees-card-name {
+                        white-space: normal !important;
+                        line-height: 1.35 !important;
+                    }
+                    .employees-position {
+                        max-width: 100% !important;
+                        white-space: normal !important;
+                        line-height: 1.5 !important;
+                    }
+                    .employees-detail-value {
+                        white-space: normal !important;
+                        overflow-wrap: anywhere !important;
+                    }
+                    .employees-pagination { margin-top: 22px !important; }
+                    .employees-page-btn { min-width: 38px !important; height: 38px !important; padding: 0 12px !important; }
+                    .employees-toast {
+                        width: calc(100% - 32px) !important;
+                        justify-content: center !important;
+                        text-align: center !important;
+                    }
+                }
+                @media (max-width: 380px) {
+                    .employees-main { padding: 24px 14px !important; }
+                    .employees-card-actions { grid-template-columns: 1fr !important; }
+                    .employees-page-btn { flex: 1 1 auto !important; }
+                    .employees-empty { padding: 64px 12px !important; }
+                }
             `}</style>
 
       <Navbar />
 
       {toast && (
         <div
+          className="employees-toast"
           style={{
             ...s.toast,
             background: toast.type === "error" ? "#fef2f2" : "#ecfdf5",
@@ -228,17 +284,19 @@ export default function EmployeeListPage() {
         onConfirm={confirmDelete}
       />
 
-      <main style={s.main}>
-        <div style={s.header}>
+      <main className="employees-main" style={s.main}>
+        <div className="employees-header" style={s.header}>
           <div>
-            <h1 style={s.pageTitle}>الموظفون</h1>
+            <h1 className="employees-title" style={s.pageTitle}>
+              الموظفون
+            </h1>
             <p style={s.pageSub}>
               {loading
                 ? "جاري التحميل..."
                 : `${pagination.total} موظف | عرض ${pagination.from || 0}-${pagination.to || 0}`}
             </p>
           </div>
-          <button style={s.addBtn} onClick={() => navigate("/employees/add")}>
+          <button className="employees-add-btn" style={s.addBtn} onClick={() => navigate("/employees/add")}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
               <line
                 x1="12"
@@ -263,7 +321,7 @@ export default function EmployeeListPage() {
           </button>
         </div>
 
-        <div style={s.searchWrap}>
+        <div className="employees-search" style={s.searchWrap}>
           <span style={s.searchIco}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
               <circle cx="11" cy="11" r="8" stroke="#94a3b8" strokeWidth="2" />
@@ -314,7 +372,7 @@ export default function EmployeeListPage() {
           )}
         </div>
 
-        <div style={s.filtersBar}>
+        <div className="employees-filters" style={s.filtersBar}>
           <label style={s.filterField}>
             <span style={s.filterLabel}>المسمى الوظيفي</span>
             <select
@@ -376,7 +434,7 @@ export default function EmployeeListPage() {
           </label>
 
           {hasActiveFilters && (
-            <button style={s.filterClearBtn} onClick={clearFilters}>
+            <button className="employees-clear-filters" style={s.filterClearBtn} onClick={clearFilters}>
               مسح الفلاتر
             </button>
           )}
@@ -388,7 +446,7 @@ export default function EmployeeListPage() {
             <p style={s.loadingText}>جاري تحميل الموظفين...</p>
           </div>
         ) : employees.length === 0 ? (
-          <div style={s.emptyWrap}>
+          <div className="employees-empty" style={s.emptyWrap}>
             <div style={s.emptyIcon}>
               <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
                 <path
@@ -418,17 +476,17 @@ export default function EmployeeListPage() {
           </div>
         ) : (
           <>
-          <div style={s.grid}>
+          <div className="employees-grid" style={s.grid}>
             {employees.map((emp, i) => {
               const c = colors[i % colors.length];
               return (
                 <div
                   key={emp.id}
-                  className="emp-card"
+                  className="emp-card employees-card"
                   style={{ ...s.card, animationDelay: `${i * 0.05}s` }}
                 >
-                  <div style={s.cardTop}>
-                    <div style={s.cardAvatarFrame}>
+                  <div className="employees-card-top" style={s.cardTop}>
+                    <div className="employees-avatar" style={s.cardAvatarFrame}>
                       {emp.image ? (
                         <img
                           src={`${STORAGE_URL}/${emp.image}`}
@@ -442,8 +500,13 @@ export default function EmployeeListPage() {
                       )}
                     </div>
                     <div style={s.cardInfo}>
-                      <p style={s.cardName}>{emp.name}</p>
-                      <span style={{ ...s.positionBadge, background: c.bg, color: c.text }}>
+                      <p className="employees-card-name" style={s.cardName}>
+                        {emp.name}
+                      </p>
+                      <span
+                        className="employees-position"
+                        style={{ ...s.positionBadge, background: c.bg, color: c.text }}
+                      >
                         {emp.position}
                       </span>
                     </div>
@@ -546,6 +609,7 @@ export default function EmployeeListPage() {
                             fontWeight: row.bold ? "700" : "500",
                             color: row.color || "#475569",
                           }}
+                          className="employees-detail-value"
                         >
                           {row.val}
                         </span>
@@ -553,7 +617,7 @@ export default function EmployeeListPage() {
                     ))}
                   </div>
 
-                  <div style={s.cardActions}>
+                  <div className="employees-card-actions" style={s.cardActions}>
                     <button
                       className="action-btn"
                       style={s.viewBtn}
@@ -624,8 +688,9 @@ export default function EmployeeListPage() {
             })}
           </div>
           {pagination.last_page > 1 && (
-            <div style={s.paginationWrap}>
+            <div className="employees-pagination" style={s.paginationWrap}>
               <button
+                className="employees-page-btn"
                 style={{
                   ...s.pageBtn,
                   ...(page <= 1 ? s.pageBtnDisabled : {}),
@@ -638,6 +703,7 @@ export default function EmployeeListPage() {
 
               {Array.from({ length: pagination.last_page }, (_, i) => i + 1).map((pageNumber) => (
                 <button
+                  className="employees-page-btn"
                   key={pageNumber}
                   style={{
                     ...s.pageBtn,
@@ -650,6 +716,7 @@ export default function EmployeeListPage() {
               ))}
 
               <button
+                className="employees-page-btn"
                 style={{
                   ...s.pageBtn,
                   ...(page >= pagination.last_page ? s.pageBtnDisabled : {}),

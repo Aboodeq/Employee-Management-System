@@ -8,8 +8,10 @@ import {
   todayDateInputValue,
   validateEmployeeForm,
 } from "../utils/employeeValidation";
+import { useI18n } from "../i18n/i18n";
 
 export default function EditEmployeePage() {
+  const { dir, t } = useI18n();
   const { id } = useParams();
   const navigate = useNavigate();
   const today = todayDateInputValue();
@@ -53,9 +55,9 @@ export default function EditEmployeePage() {
           setRemoveImage(false);
         }
       })
-      .catch(() => showToast("فشل تحميل بيانات الموظف", "error"))
+      .catch(() => showToast(t("form.loadError"), "error"))
       .finally(() => setFetching(false));
-  }, [id]);
+  }, [id, t]);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -75,10 +77,10 @@ export default function EditEmployeePage() {
     e.preventDefault();
     setErrors({});
 
-    const clientErrors = validateEmployeeForm(form);
+    const clientErrors = validateEmployeeForm(form, t);
     if (Object.keys(clientErrors).length > 0) {
       setErrors(clientErrors);
-      showToast(firstEmployeeError(clientErrors), "error");
+      showToast(firstEmployeeError(clientErrors, t), "error");
       return;
     }
 
@@ -94,14 +96,14 @@ export default function EditEmployeePage() {
     try {
       const res = await updateEmployee(id, fd);
       if (res.success) {
-        showToast("تم تحديث بيانات الموظف بنجاح ✓");
+        showToast(t("form.updateSuccess"));
         setTimeout(() => navigate(`/employees/${id}`), 1200);
       } else {
         setErrors(res.errors || {});
-        showToast(firstEmployeeError(res.errors || {}), "error");
+        showToast(firstEmployeeError(res.errors || {}, t), "error");
       }
     } catch {
-      showToast("تعذر الاتصال بالخادم، تأكد أن الباك اند يعمل", "error");
+      showToast(t("form.serverUnavailable"), "error");
     } finally {
       setLoading(false);
     }
@@ -110,9 +112,9 @@ export default function EditEmployeePage() {
   const fields = [
     {
       name: "name",
-      label: "الاسم الكامل",
+      label: t("form.fields.name"),
       type: "text",
-      placeholder: "مثال: أحمد محمد",
+      placeholder: t("form.fields.namePlaceholder"),
       icon: (
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
           <path
@@ -127,9 +129,9 @@ export default function EditEmployeePage() {
     },
     {
       name: "email",
-      label: "البريد الإلكتروني",
+      label: t("form.fields.email"),
       type: "email",
-      placeholder: "example@email.com",
+      placeholder: t("form.fields.emailPlaceholder"),
       icon: (
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
           <path
@@ -143,9 +145,9 @@ export default function EditEmployeePage() {
     },
     {
       name: "phone",
-      label: "رقم الهاتف",
+      label: t("form.fields.phone"),
       type: "tel",
-      placeholder: "09xxxxxxxx",
+      placeholder: t("form.fields.phonePlaceholder"),
       inputMode: "numeric",
       maxLength: 10,
       pattern: "09[0-9]{8}",
@@ -161,9 +163,9 @@ export default function EditEmployeePage() {
     },
     {
       name: "position",
-      label: "المسمى الوظيفي",
+      label: t("form.fields.position"),
       type: "text",
-      placeholder: "مثال: مطور برمجيات",
+      placeholder: t("form.fields.positionPlaceholder"),
       icon: (
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
           <rect x="2" y="7" width="20" height="14" rx="2" stroke="#94a3b8" strokeWidth="2" />
@@ -178,9 +180,9 @@ export default function EditEmployeePage() {
     },
     {
       name: "salary",
-      label: "الراتب (ل.س)",
+      label: t("form.fields.salary"),
       type: "number",
-      placeholder: "500000",
+      placeholder: t("form.fields.salaryPlaceholder"),
       min: "1",
       step: "0.01",
       icon: (
@@ -205,7 +207,7 @@ export default function EditEmployeePage() {
     },
     {
       name: "hire_date",
-      label: "تاريخ التعيين",
+      label: t("form.fields.hireDate"),
       type: "date",
       placeholder: "",
       min: "1990-01-01",
@@ -239,18 +241,18 @@ export default function EditEmployeePage() {
 
   if (fetching)
     return (
-      <div style={s.page}>
+      <div style={{ ...s.page, direction: dir }} dir={dir}>
         <Navbar />
         <div style={s.loadingWrap}>
           <div style={s.spinner} />
-          <p style={s.loadingText}>جاري تحميل البيانات...</p>
+          <p style={s.loadingText}>{t("form.fetching")}</p>
         </div>
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
 
   return (
-    <div className="employee-form-page" style={s.page}>
+    <div className="employee-form-page" style={{ ...s.page, direction: dir }} dir={dir}>
       <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap');
                 @keyframes spin { to { transform: rotate(360deg); } }
@@ -343,13 +345,13 @@ export default function EditEmployeePage() {
                 strokeLinejoin="round"
               />
             </svg>
-            رجوع
+            {t("common.back")}
           </button>
           <div>
             <h1 className="employee-form-title" style={s.pageTitle}>
-              تعديل بيانات الموظف
+              {t("form.editTitle")}
             </h1>
-            <p style={s.pageSub}>قم بتعديل البيانات ثم احفظ التغييرات</p>
+            <p style={s.pageSub}>{t("form.editSubtitle")}</p>
           </div>
         </div>
 
@@ -398,7 +400,7 @@ export default function EditEmployeePage() {
                   {loading ? (
                     <>
                       <span style={s.spinnerSm} />
-                      جاري الحفظ...
+                      {t("common.saving")}
                     </>
                   ) : (
                     <>
@@ -422,7 +424,7 @@ export default function EditEmployeePage() {
                           strokeLinejoin="round"
                         />
                       </svg>
-                      حفظ التغييرات
+                      {t("form.saveChanges")}
                     </>
                   )}
                 </button>
@@ -432,7 +434,7 @@ export default function EditEmployeePage() {
                   style={s.cancelBtn}
                   onClick={() => navigate(`/employees/${id}`)}
                 >
-                  إلغاء
+                  {t("common.cancel")}
                 </button>
               </div>
             </form>
@@ -440,11 +442,16 @@ export default function EditEmployeePage() {
 
           {/* Image */}
           <div className="employee-form-side" style={s.sideCard}>
-            <h3 style={s.sideTitle}>صورة الموظف</h3>
-            <p style={s.sideSub}>اختياري — يمكنك تغييرها</p>
+            <h3 style={s.sideTitle}>{t("form.imageTitle")}</h3>
+            <p style={s.sideSub}>{t("form.imageOptionalEdit")}</p>
             <label className="upload-zone employee-form-upload" style={s.uploadZone}>
               {preview ? (
-                <img className="employee-form-preview" src={preview} alt="preview" style={s.previewImg} />
+                <img
+                  className="employee-form-preview"
+                  src={preview}
+                  alt={t("common.previewAlt")}
+                  style={s.previewImg}
+                />
               ) : (
                 <div style={s.uploadPlaceholder}>
                   <div style={s.uploadIcon}>
@@ -473,7 +480,7 @@ export default function EditEmployeePage() {
                       />
                     </svg>
                   </div>
-                  <p style={s.uploadText}>اضغط لرفع صورة</p>
+                  <p style={s.uploadText}>{t("form.uploadImage")}</p>
                 </div>
               )}
               <input
@@ -499,7 +506,7 @@ export default function EditEmployeePage() {
                   setRemoveImage(true);
                 }}
               >
-                إزالة الصورة
+                {t("form.removeImage")}
               </button>
             )}
           </div>

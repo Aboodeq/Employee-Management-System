@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { useAuth } from "./context/authContextValue";
+import { I18nProvider } from "./i18n/i18n";
 import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
 import EmployeeListPage from "./pages/EmployeeListPage";
@@ -39,7 +40,6 @@ function AppRoutes() {
         }
       />
 
-      {/* add قبل :id مهم جداً */}
       <Route
         path="/employees/add"
         element={
@@ -74,11 +74,13 @@ function AppRoutes() {
 
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <AppRoutes />
-      </BrowserRouter>
-    </AuthProvider>
+    <I18nProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <AppRoutes />
+        </BrowserRouter>
+      </AuthProvider>
+    </I18nProvider>
   );
 }
 

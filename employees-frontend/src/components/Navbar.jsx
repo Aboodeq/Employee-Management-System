@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/authContextValue";
+import { useI18n } from "../i18n/i18n";
 
 export default function Navbar() {
   const navigate = useNavigate();
   const { logout } = useAuth();
+  const { dir, t, toggleLanguage } = useI18n();
   const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLogout = async () => {
@@ -13,7 +15,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="app-nav" style={s.nav}>
+    <nav className="app-nav" style={{ ...s.nav, direction: dir }} dir={dir}>
       <style>{`
         .app-nav,
         .app-nav * {
@@ -69,9 +71,9 @@ export default function Navbar() {
             <span style={s.logo}>EMS</span>
             <div>
               <p className="app-nav-title" style={s.title}>
-                نظام إدارة الموظفين
+                {t("common.appName")}
               </p>
-              <p style={s.subtitle}>لوحة المدير</p>
+              <p style={s.subtitle}>{t("common.adminDashboard")}</p>
             </div>
           </div>
 
@@ -79,7 +81,7 @@ export default function Navbar() {
             type="button"
             className="app-nav-menu-btn"
             style={s.menuBtn}
-            aria-label="فتح القائمة"
+            aria-label={menuOpen ? t("common.closeMenu") : t("common.openMenu")}
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen((open) => !open)}
           >
@@ -148,7 +150,7 @@ export default function Navbar() {
             style={({ isActive }) => linkStyle(isActive)}
             onClick={() => setMenuOpen(false)}
           >
-            لوحة التحكم
+            {t("common.dashboard")}
           </NavLink>
           <NavLink
             className="app-nav-link"
@@ -156,10 +158,22 @@ export default function Navbar() {
             style={({ isActive }) => linkStyle(isActive)}
             onClick={() => setMenuOpen(false)}
           >
-            الموظفون
+            {t("common.employees")}
           </NavLink>
+          <button
+            type="button"
+            className="app-nav-logout"
+            style={s.languageBtn}
+            title={t("common.language")}
+            onClick={() => {
+              toggleLanguage();
+              setMenuOpen(false);
+            }}
+          >
+            {t("common.switchToLanguage")}
+          </button>
           <button type="button" className="app-nav-logout" style={s.logout} onClick={handleLogout}>
-            تسجيل الخروج
+            {t("common.logout")}
           </button>
         </div>
       </div>
@@ -262,6 +276,20 @@ const s = {
     padding: "9px 14px",
     fontSize: "13px",
     fontWeight: "700",
+    cursor: "pointer",
+    fontFamily: "'Cairo', sans-serif",
+  },
+  languageBtn: {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    color: "#2563eb",
+    background: "#eff6ff",
+    border: "1px solid #dbeafe",
+    borderRadius: "10px",
+    padding: "9px 14px",
+    fontSize: "13px",
+    fontWeight: "800",
     cursor: "pointer",
     fontFamily: "'Cairo', sans-serif",
   },

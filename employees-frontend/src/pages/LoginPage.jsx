@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/authContextValue";
+import { useI18n } from "../i18n/i18n";
 
 const REMEMBER_USERNAME_KEY = "ems_remember_username";
 
 export default function LoginPage() {
+  const { dir, isRtl, t, toggleLanguage } = useI18n();
   const rememberedUsername = localStorage.getItem(REMEMBER_USERNAME_KEY) || "";
   const [username, setUsername] = useState(rememberedUsername);
   const [password, setPassword] = useState("");
@@ -31,14 +33,15 @@ export default function LoginPage() {
         }
 
         navigate("/");
-      } else setError(result.message || "اسم المستخدم أو كلمة المرور غير صحيحة");
+      } else setError(result.message || t("login.invalidCredentials"));
     } catch {
-      setError("تعذر الاتصال بالخادم، تأكد أن الباك اند يعمل");
+      setError(t("login.serverUnavailable"));
     } finally {
       setLoading(false);
     }
   };
 
+  const featureContent = t("login.features");
   const features = [
     {
       icon: (
@@ -58,8 +61,8 @@ export default function LoginPage() {
           />
         </svg>
       ),
-      title: "إدارة الموظفين",
-      desc: "إضافة وتعديل وحذف بيانات الموظفين بسهولة تامة",
+      title: featureContent[0].title,
+      desc: featureContent[0].desc,
     },
     {
       icon: (
@@ -68,8 +71,8 @@ export default function LoginPage() {
           <path d="M8 21h8M12 17v4" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
         </svg>
       ),
-      title: "واجهة تفاعلية",
-      desc: "تجربة مستخدم سلسة مبنية بـ React",
+      title: featureContent[1].title,
+      desc: featureContent[1].desc,
     },
     {
       icon: (
@@ -88,8 +91,8 @@ export default function LoginPage() {
           />
         </svg>
       ),
-      title: "RESTful API",
-      desc: "باك إند متكامل بـ Laravel مع JSON responses",
+      title: featureContent[2].title,
+      desc: featureContent[2].desc,
     },
     {
       icon: (
@@ -102,8 +105,8 @@ export default function LoginPage() {
           />
         </svg>
       ),
-      title: "نظام صلاحيات",
-      desc: "تسجيل دخول آمن خاص بالمدير فقط",
+      title: featureContent[3].title,
+      desc: featureContent[3].desc,
     },
   ];
 
@@ -266,26 +269,29 @@ export default function LoginPage() {
                 }
             `}</style>
 
-      <div className="login-page" style={s.page}>
+      <div
+        className="login-page"
+        style={{ ...s.page, direction: dir, flexDirection: isRtl ? "row-reverse" : "row" }}
+        dir={dir}
+      >
         {/* ===== RIGHT: Colored panel ===== */}
         <div className="login-hero" style={s.right}>
           <div className="login-hero-inner" style={s.rightInner}>
             <div className="login-brand" style={s.brandRow}>
               <div style={s.brandDot} />
               <span className="login-brand-name" style={s.brandName}>
-                EMS — Employee Management System
+                {t("login.brandName")}
               </span>
             </div>
 
             <div style={s.heroBlock}>
               <h1 className="login-hero-title" style={s.heroTitle}>
-                أدِر فريقك
+                {t("login.heroTitleLine1")}
                 <br />
-                باحترافية كاملة
+                {t("login.heroTitleLine2")}
               </h1>
               <p className="login-hero-sub" style={s.heroSub}>
-                منصة متكاملة تجمع كل ما تحتاجه لإدارة موظفيك في مكان واحد — من بيانات التوظيف إلى
-                الرواتب والمسميات.
+                {t("login.heroSubtitle")}
               </p>
             </div>
 
@@ -306,7 +312,7 @@ export default function LoginPage() {
             </div>
 
             <div className="login-bottom-tag" style={s.bottomTag}>
-              Laravel + React · CRUD Operations · REST API
+              {t("login.techStack")}
             </div>
           </div>
 
@@ -322,6 +328,9 @@ export default function LoginPage() {
         {/* ===== LEFT: Form panel ===== */}
         <div className="login-form-panel" style={s.left}>
           <div className="login-form-wrap" style={s.formWrap}>
+            <button type="button" style={s.languageBtn} onClick={toggleLanguage}>
+              {t("common.switchToLanguage")}
+            </button>
             <div className="login-form-header" style={s.formHeader}>
               <div className="login-form-icon" style={s.formIconWrap}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -336,10 +345,10 @@ export default function LoginPage() {
               </div>
               <div>
                 <h2 className="login-form-title" style={s.formTitle}>
-                  تسجيل الدخول
+                  {t("login.formTitle")}
                 </h2>
                 <p className="login-form-sub" style={s.formSub}>
-                  مخصص للمدير فقط
+                  {t("login.adminOnly")}
                 </p>
               </div>
             </div>
@@ -347,7 +356,7 @@ export default function LoginPage() {
             <form className="login-form" onSubmit={handleSubmit} style={s.form}>
               {/* Username */}
               <div style={s.field}>
-                <label style={s.label}>اسم المستخدم</label>
+                <label style={s.label}>{t("login.username")}</label>
                 <div style={s.inputRow}>
                   <span style={s.icoRight}>
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
@@ -364,7 +373,7 @@ export default function LoginPage() {
                     className="login-input"
                     style={s.input}
                     type="text"
-                    placeholder="أدخل اسم المستخدم"
+                    placeholder={t("login.usernamePlaceholder")}
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     required
@@ -375,7 +384,7 @@ export default function LoginPage() {
 
               {/* Password */}
               <div style={s.field}>
-                <label style={s.label}>كلمة المرور</label>
+                <label style={s.label}>{t("login.password")}</label>
                 <div style={s.inputRow}>
                   <span style={s.icoRight}>
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
@@ -400,13 +409,18 @@ export default function LoginPage() {
                     className="login-input"
                     style={s.input}
                     type={showPass ? "text" : "password"}
-                    placeholder="أدخل كلمة المرور"
+                    placeholder={t("login.passwordPlaceholder")}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     autoComplete="current-password"
                   />
-                  <button type="button" onClick={() => setShowPass(!showPass)} style={s.eyeBtn}>
+                  <button
+                    type="button"
+                    aria-label={showPass ? t("login.hidePassword") : t("login.showPassword")}
+                    onClick={() => setShowPass(!showPass)}
+                    style={s.eyeBtn}
+                  >
                     {showPass ? (
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
                         <path
@@ -447,7 +461,7 @@ export default function LoginPage() {
                     onChange={(e) => setRememberMe(e.target.checked)}
                     style={s.rememberCheckbox}
                   />
-                  <span>تذكرني</span>
+                  <span>{t("login.rememberMe")}</span>
                 </label>
 
                 <button
@@ -456,10 +470,10 @@ export default function LoginPage() {
                   style={s.forgotBtn}
                   onClick={() => {
                     setError("");
-                    setNotice("يرجى التواصل مع مسؤول النظام لإعادة تعيين كلمة المرور.");
+                    setNotice(t("login.passwordResetNotice"));
                   }}
                 >
-                  نسيت كلمة المرور؟
+                  {t("login.forgotPassword")}
                 </button>
               </div>
 
@@ -510,11 +524,11 @@ export default function LoginPage() {
                 {loading ? (
                   <span style={s.btnInner}>
                     <span style={s.spinner} />
-                    جاري تسجيل الدخول...
+                    {t("login.signingIn")}
                   </span>
                 ) : (
                   <span style={s.btnInner}>
-                    تسجيل الدخول
+                    {t("login.submit")}
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                       <path
                         d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"
@@ -676,6 +690,21 @@ const s = {
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
+    position: "relative",
+  },
+  languageBtn: {
+    position: "absolute",
+    top: "24px",
+    insetInlineEnd: "24px",
+    border: "1px solid #dbeafe",
+    background: "#eff6ff",
+    color: "#2563eb",
+    borderRadius: "10px",
+    padding: "8px 13px",
+    fontSize: "13px",
+    fontWeight: "800",
+    cursor: "pointer",
+    fontFamily: "'Cairo', sans-serif",
   },
   formHeader: {
     display: "flex",

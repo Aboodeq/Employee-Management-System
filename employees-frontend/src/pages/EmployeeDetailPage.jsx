@@ -3,8 +3,10 @@ import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import DeleteConfirmModal from "../components/DeleteConfirmModal";
 import { getEmployee, deleteEmployee } from "../api/employeeApi";
+import { useI18n } from "../i18n/i18n";
 
 export default function EmployeeDetailPage() {
+  const { dir, formatDate, formatNumber, t } = useI18n();
   const { id } = useParams();
   const navigate = useNavigate();
   const [employee, setEmployee] = useState(null);
@@ -22,11 +24,11 @@ export default function EmployeeDetailPage() {
     getEmployee(id)
       .then((res) => {
         if (res.success) setEmployee(res.data);
-        else showToast("لم يتم العثور على الموظف", "error");
+        else showToast(t("detail.notFoundToast"), "error");
       })
-      .catch(() => showToast("حدث خطأ أثناء التحميل", "error"))
+      .catch(() => showToast(t("detail.loadError"), "error"))
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, t]);
 
   const confirmDelete = async () => {
     setDeleting(true);
@@ -37,21 +39,21 @@ export default function EmployeeDetailPage() {
       }
 
       setDeleteConfirmOpen(false);
-      showToast("تم حذف الموظف بنجاح");
+      showToast(t("detail.deleteSuccess"));
       setTimeout(() => navigate("/employees"), 1200);
     } catch {
-      showToast("فشل الحذف، حاول مجدداً", "error");
+      showToast(t("detail.deleteError"), "error");
       setDeleting(false);
     }
   };
 
   if (loading)
     return (
-      <div style={s.page}>
+      <div style={{ ...s.page, direction: dir }} dir={dir}>
         <Navbar />
         <div style={s.loadingWrap}>
           <div style={s.loadingSpinner} />
-          <p style={s.loadingText}>جاري تحميل بيانات الموظف...</p>
+          <p style={s.loadingText}>{t("detail.loadingEmployee")}</p>
         </div>
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
@@ -59,12 +61,12 @@ export default function EmployeeDetailPage() {
 
   if (!employee)
     return (
-      <div style={s.page}>
+      <div style={{ ...s.page, direction: dir }} dir={dir}>
         <Navbar />
         <div style={s.loadingWrap}>
-          <p style={s.loadingText}>لم يتم العثور على الموظف</p>
+          <p style={s.loadingText}>{t("detail.notFound")}</p>
           <button style={s.backBtnAlt} onClick={() => navigate("/employees")}>
-            العودة للقائمة
+            {t("common.backToList")}
           </button>
         </div>
       </div>
@@ -79,7 +81,7 @@ export default function EmployeeDetailPage() {
 
   const infoRows = [
     {
-      label: "البريد الإلكتروني",
+      label: t("detail.fields.email"),
       value: employee.email,
       icon: (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -95,7 +97,7 @@ export default function EmployeeDetailPage() {
       bg: "#eff6ff",
     },
     {
-      label: "رقم الهاتف",
+      label: t("detail.fields.phone"),
       value: employee.phone,
       icon: (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -110,7 +112,7 @@ export default function EmployeeDetailPage() {
       bg: "#f5f3ff",
     },
     {
-      label: "المسمى الوظيفي",
+      label: t("detail.fields.position"),
       value: employee.position,
       icon: (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -127,8 +129,8 @@ export default function EmployeeDetailPage() {
       bg: "#ecfdf5",
     },
     {
-      label: "الراتب الشهري",
-      value: `${parseFloat(employee.salary).toLocaleString()} ل.س`,
+      label: t("detail.fields.monthlySalary"),
+      value: `${formatNumber(parseFloat(employee.salary))} ${t("common.syp")}`,
       icon: (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
           <line
@@ -153,8 +155,8 @@ export default function EmployeeDetailPage() {
       bold: true,
     },
     {
-      label: "تاريخ التعيين",
-      value: new Date(employee.hire_date).toLocaleDateString("en-GB", {
+      label: t("detail.fields.hireDate"),
+      value: formatDate(employee.hire_date, {
         year: "numeric",
         month: "long",
         day: "numeric",
@@ -187,8 +189,8 @@ export default function EmployeeDetailPage() {
       bg: "#ecfeff",
     },
     {
-      label: "تاريخ الإضافة",
-      value: new Date(employee.created_at).toLocaleDateString("en-GB", {
+      label: t("detail.fields.createdAt"),
+      value: formatDate(employee.created_at, {
         year: "numeric",
         month: "long",
         day: "numeric",
@@ -210,7 +212,7 @@ export default function EmployeeDetailPage() {
   ];
 
   return (
-    <div className="employee-detail-page" style={s.page}>
+    <div className="employee-detail-page" style={{ ...s.page, direction: dir }} dir={dir}>
       <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap');
                 @keyframes spin    { to { transform: rotate(360deg); } }
@@ -349,7 +351,7 @@ export default function EmployeeDetailPage() {
               strokeLinejoin="round"
             />
           </svg>
-          العودة للقائمة
+          {t("common.backToList")}
         </button>
 
         <div className="employee-detail-layout" style={s.layout}>
@@ -381,7 +383,7 @@ export default function EmployeeDetailPage() {
               </span>
 
               <div className="employee-id-badge" style={s.idBadge}>
-                <span style={s.idLabel}>رقم الموظف</span>
+                <span style={s.idLabel}>{t("detail.employeeId")}</span>
                 <span style={s.idVal}>#{String(employee.id).padStart(4, "0")}</span>
               </div>
 
@@ -389,18 +391,20 @@ export default function EmployeeDetailPage() {
               <div className="employee-quick-stats" style={s.quickStats}>
                 <div style={s.qStat}>
                   <p className="employee-quick-stat-value" style={s.qStatVal}>
-                    {parseFloat(employee.salary).toLocaleString()}
+                    {formatNumber(parseFloat(employee.salary))}
                   </p>
-                  <p style={s.qStatLabel}>الراتب ل.س</p>
+                  <p style={s.qStatLabel}>{t("detail.salarySyp")}</p>
                 </div>
                 <div className="employee-q-divider" style={s.qDivider} />
                 <div style={s.qStat}>
                   <p className="employee-quick-stat-value" style={s.qStatVal}>
-                    {Math.floor(
-                      (new Date() - new Date(employee.hire_date)) / (1000 * 60 * 60 * 24 * 30),
+                    {formatNumber(
+                      Math.floor(
+                        (new Date() - new Date(employee.hire_date)) / (1000 * 60 * 60 * 24 * 30),
+                      ),
                     )}
                   </p>
-                  <p style={s.qStatLabel}>شهر في العمل</p>
+                  <p style={s.qStatLabel}>{t("detail.monthsAtWork")}</p>
                 </div>
               </div>
 
@@ -425,7 +429,7 @@ export default function EmployeeDetailPage() {
                       strokeLinecap="round"
                     />
                   </svg>
-                  تعديل البيانات
+                  {t("detail.editData")}
                 </button>
                 <button
                   className="del-btn"
@@ -453,7 +457,7 @@ export default function EmployeeDetailPage() {
                       strokeLinecap="round"
                     />
                   </svg>
-                  {deleting ? "جاري الحذف..." : "حذف الموظف"}
+                  {deleting ? t("common.deleting") : t("detail.deleteEmployee")}
                 </button>
               </div>
             </div>
@@ -462,7 +466,7 @@ export default function EmployeeDetailPage() {
           {/* Right: Info card */}
           <div className="employee-info-card" style={s.infoCard}>
             <div className="employee-info-header" style={s.infoHeader}>
-              <h3 style={s.infoTitle}>تفاصيل الموظف</h3>
+              <h3 style={s.infoTitle}>{t("detail.details")}</h3>
               <span style={s.infoBadge}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
                   <path
@@ -479,7 +483,7 @@ export default function EmployeeDetailPage() {
                     strokeLinejoin="round"
                   />
                 </svg>
-                نشط
+                {t("detail.active")}
               </span>
             </div>
 

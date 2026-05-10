@@ -1,3 +1,5 @@
+import { translate } from "../i18n/i18n";
+
 const phoneRegex = /^09\d{8}$/;
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const nameRegex = /^[\p{L}\s'.-]+$/u;
@@ -13,7 +15,7 @@ export const todayDateInputValue = () => {
   return new Date(today.getTime() - timezoneOffset).toISOString().slice(0, 10);
 };
 
-export const validateEmployeeForm = (form) => {
+export const validateEmployeeForm = (form, t = translate) => {
   const errors = {};
   const name = form.name.trim();
   const email = form.email.trim();
@@ -22,41 +24,41 @@ export const validateEmployeeForm = (form) => {
   const salary = Number(form.salary);
   const today = todayDateInputValue();
 
-  if (!name) errors.name = "الاسم الكامل مطلوب";
-  else if (name.length < 2) errors.name = "الاسم يجب أن يحتوي على حرفين على الأقل";
-  else if (name.length > 120) errors.name = "الاسم يجب ألا يتجاوز 120 حرفاً";
-  else if (!nameRegex.test(name)) errors.name = "الاسم يجب أن يحتوي على أحرف ومسافات فقط";
+  if (!name) errors.name = t("validation.nameRequired");
+  else if (name.length < 2) errors.name = t("validation.nameMin");
+  else if (name.length > 120) errors.name = t("validation.nameMax");
+  else if (!nameRegex.test(name)) errors.name = t("validation.nameRegex");
 
-  if (!email) errors.email = "البريد الإلكتروني مطلوب";
-  else if (!emailRegex.test(email)) errors.email = "صيغة البريد الإلكتروني غير صحيحة";
-  else if (email.length > 255) errors.email = "البريد الإلكتروني طويل جداً";
+  if (!email) errors.email = t("validation.emailRequired");
+  else if (!emailRegex.test(email)) errors.email = t("validation.emailInvalid");
+  else if (email.length > 255) errors.email = t("validation.emailMax");
 
-  if (!phone) errors.phone = "رقم الهاتف مطلوب";
-  else if (!phoneRegex.test(phone)) errors.phone = "رقم الهاتف يجب أن يبدأ بـ 09 ويتكون من 10 أرقام فقط";
+  if (!phone) errors.phone = t("validation.phoneRequired");
+  else if (!phoneRegex.test(phone)) errors.phone = t("validation.phoneInvalid");
 
-  if (!position) errors.position = "المسمى الوظيفي مطلوب";
-  else if (position.length < 2) errors.position = "المسمى الوظيفي قصير جداً";
-  else if (position.length > 120) errors.position = "المسمى الوظيفي يجب ألا يتجاوز 120 حرفاً";
-  else if (!positionRegex.test(position)) errors.position = "المسمى الوظيفي يحتوي على رموز غير مسموحة";
+  if (!position) errors.position = t("validation.positionRequired");
+  else if (position.length < 2) errors.position = t("validation.positionMin");
+  else if (position.length > 120) errors.position = t("validation.positionMax");
+  else if (!positionRegex.test(position)) errors.position = t("validation.positionRegex");
 
-  if (form.salary === "") errors.salary = "الراتب مطلوب";
-  else if (!Number.isFinite(salary) || salary <= 0) errors.salary = "الراتب يجب أن يكون رقماً أكبر من صفر";
-  else if (salary > 999999999.99) errors.salary = "الراتب كبير جداً";
+  if (form.salary === "") errors.salary = t("validation.salaryRequired");
+  else if (!Number.isFinite(salary) || salary <= 0) errors.salary = t("validation.salaryInvalid");
+  else if (salary > 999999999.99) errors.salary = t("validation.salaryMax");
 
-  if (!form.hire_date) errors.hire_date = "تاريخ التعيين مطلوب";
-  else if (form.hire_date < earliestHireDate) errors.hire_date = "تاريخ التعيين قديم جداً";
-  else if (form.hire_date > today) errors.hire_date = "تاريخ التعيين لا يمكن أن يكون في المستقبل";
+  if (!form.hire_date) errors.hire_date = t("validation.hireDateRequired");
+  else if (form.hire_date < earliestHireDate) errors.hire_date = t("validation.hireDateOld");
+  else if (form.hire_date > today) errors.hire_date = t("validation.hireDateFuture");
 
   if (form.image && !allowedImageTypes.includes(form.image.type)) {
-    errors.image = "الصورة يجب أن تكون JPG أو PNG أو WEBP";
+    errors.image = t("validation.imageType");
   } else if (form.image && form.image.size > 2 * 1024 * 1024) {
-    errors.image = "حجم الصورة يجب ألا يتجاوز 2MB";
+    errors.image = t("validation.imageSize");
   }
 
   return errors;
 };
 
-export const firstEmployeeError = (errors) => {
+export const firstEmployeeError = (errors, t = translate) => {
   const first = Object.values(errors).find(Boolean);
-  return Array.isArray(first) ? first[0] : first || "يرجى مراجعة البيانات المدخلة";
+  return Array.isArray(first) ? first[0] : first || t("validation.reviewData");
 };

@@ -52,7 +52,7 @@ class Handler extends ExceptionHandler
         if ($request->is('api/*')) {
             return response()->json([
                 'success' => false,
-                'message' => 'Unauthenticated.',
+                'message' => __('messages.auth.unauthenticated'),
             ], 401);
         }
 

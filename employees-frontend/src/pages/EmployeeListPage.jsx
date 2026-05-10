@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import DeleteConfirmModal from "../components/DeleteConfirmModal";
 import { getAllEmployees, deleteEmployee, getEmployeeFilterOptions } from "../api/employeeApi";
+import { useI18n } from "../i18n/i18n";
 
 const PAGE_SIZE = 12;
 const STORAGE_URL = "http://127.0.0.1:8000/storage";
@@ -15,6 +16,7 @@ const initialFilters = {
 };
 
 export default function EmployeeListPage() {
+  const { dir, formatDate, formatNumber, t } = useI18n();
   const [employees, setEmployees] = useState([]);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -65,10 +67,10 @@ export default function EmployeeListPage() {
             },
           );
         })
-        .catch(() => showToast("حدث خطأ أثناء جلب البيانات", "error"))
+        .catch(() => showToast(t("employees.fetchError"), "error"))
         .finally(() => setLoading(false));
     },
-    [debouncedSearch, filters, page, showToast],
+    [debouncedSearch, filters, page, showToast, t],
   );
 
   useEffect(() => {
@@ -138,7 +140,7 @@ export default function EmployeeListPage() {
       }
 
       setPendingDelete(null);
-      showToast("تم حذف الموظف بنجاح");
+      showToast(t("employees.deleteSuccess"));
       if (employees.length === 1 && page > 1) {
         setLoading(true);
         setPage((p) => p - 1);
@@ -147,7 +149,7 @@ export default function EmployeeListPage() {
         fetchEmployees(page);
       }
     } catch {
-      showToast("فشل الحذف، حاول مجدداً", "error");
+      showToast(t("employees.deleteError"), "error");
     } finally {
       setDeleting(null);
     }
@@ -162,7 +164,7 @@ export default function EmployeeListPage() {
   ];
 
   return (
-    <div className="employees-page" style={s.page}>
+    <div className="employees-page" style={{ ...s.page, direction: dir }} dir={dir}>
       <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap');
                 @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
@@ -288,12 +290,16 @@ export default function EmployeeListPage() {
         <div className="employees-header" style={s.header}>
           <div>
             <h1 className="employees-title" style={s.pageTitle}>
-              الموظفون
+              {t("employees.title")}
             </h1>
             <p style={s.pageSub}>
               {loading
-                ? "جاري التحميل..."
-                : `${pagination.total} موظف | عرض ${pagination.from || 0}-${pagination.to || 0}`}
+                ? t("common.loading")
+                : t("employees.summary", {
+                    total: formatNumber(pagination.total),
+                    from: formatNumber(pagination.from || 0),
+                    to: formatNumber(pagination.to || 0),
+                  })}
             </p>
           </div>
           <button className="employees-add-btn" style={s.addBtn} onClick={() => navigate("/employees/add")}>
@@ -317,7 +323,7 @@ export default function EmployeeListPage() {
                 strokeLinecap="round"
               />
             </svg>
-            إضافة موظف
+            {t("employees.addEmployee")}
           </button>
         </div>
 
@@ -331,7 +337,7 @@ export default function EmployeeListPage() {
           <input
             className="search-input"
             style={s.searchInput}
-            placeholder="ابحث بالاسم أو المسمى أو البريد..."
+            placeholder={t("employees.searchPlaceholder")}
             value={search}
             onChange={(e) => {
               setLoading(true);
@@ -374,13 +380,13 @@ export default function EmployeeListPage() {
 
         <div className="employees-filters" style={s.filtersBar}>
           <label style={s.filterField}>
-            <span style={s.filterLabel}>المسمى الوظيفي</span>
+            <span style={s.filterLabel}>{t("employees.filters.position")}</span>
             <select
               style={s.filterSelect}
               value={filters.position}
               onChange={(e) => handleFilterChange("position", e.target.value)}
             >
-              <option value="">الكل</option>
+              <option value="">{t("employees.filters.all")}</option>
               {positionOptions.map((position) => (
                 <option key={position} value={position}>
                   {position}
@@ -390,7 +396,7 @@ export default function EmployeeListPage() {
           </label>
 
           <label style={s.filterField}>
-            <span style={s.filterLabel}>الراتب من</span>
+            <span style={s.filterLabel}>{t("employees.filters.salaryFrom")}</span>
             <input
               style={s.filterInput}
               type="number"
@@ -402,7 +408,7 @@ export default function EmployeeListPage() {
           </label>
 
           <label style={s.filterField}>
-            <span style={s.filterLabel}>الراتب إلى</span>
+            <span style={s.filterLabel}>{t("employees.filters.salaryTo")}</span>
             <input
               style={s.filterInput}
               type="number"
@@ -414,7 +420,7 @@ export default function EmployeeListPage() {
           </label>
 
           <label style={s.filterField}>
-            <span style={s.filterLabel}>تاريخ من</span>
+            <span style={s.filterLabel}>{t("employees.filters.dateFrom")}</span>
             <input
               style={s.filterInput}
               type="date"
@@ -424,7 +430,7 @@ export default function EmployeeListPage() {
           </label>
 
           <label style={s.filterField}>
-            <span style={s.filterLabel}>تاريخ إلى</span>
+            <span style={s.filterLabel}>{t("employees.filters.dateTo")}</span>
             <input
               style={s.filterInput}
               type="date"
@@ -435,7 +441,7 @@ export default function EmployeeListPage() {
 
           {hasActiveFilters && (
             <button className="employees-clear-filters" style={s.filterClearBtn} onClick={clearFilters}>
-              مسح الفلاتر
+              {t("employees.filters.clear")}
             </button>
           )}
         </div>
@@ -443,7 +449,7 @@ export default function EmployeeListPage() {
         {loading ? (
           <div style={s.loadingWrap}>
             <div style={s.loadingSpinner} />
-            <p style={s.loadingText}>جاري تحميل الموظفين...</p>
+            <p style={s.loadingText}>{t("employees.loadingEmployees")}</p>
           </div>
         ) : employees.length === 0 ? (
           <div className="employees-empty" style={s.emptyWrap}>
@@ -464,13 +470,13 @@ export default function EmployeeListPage() {
                 />
               </svg>
             </div>
-            <p style={s.emptyTitle}>لا يوجد موظفون</p>
+            <p style={s.emptyTitle}>{t("employees.emptyTitle")}</p>
             <p style={s.emptySub}>
-              {hasActiveFilters ? "لا توجد نتائج مطابقة للفلاتر" : "ابدأ بإضافة أول موظف"}
+              {hasActiveFilters ? t("employees.emptyFiltered") : t("employees.emptyAddFirst")}
             </p>
             {!hasActiveFilters && (
               <button style={s.emptyBtn} onClick={() => navigate("/employees/add")}>
-                إضافة موظف
+                {t("employees.addEmployee")}
               </button>
             )}
           </div>
@@ -561,7 +567,7 @@ export default function EmployeeListPage() {
                             />
                           </svg>
                         ),
-                        val: `${parseFloat(emp.salary).toLocaleString()} ل.س`,
+                        val: `${formatNumber(parseFloat(emp.salary))} ${t("common.syp")}`,
                         bold: true,
                         color: "#059669",
                       },
@@ -598,7 +604,7 @@ export default function EmployeeListPage() {
                             <line x1="3" y1="10" x2="21" y2="10" stroke="#94a3b8" strokeWidth="2" />
                           </svg>
                         ),
-                        val: new Date(emp.hire_date).toLocaleDateString("en-GB"),
+                        val: formatDate(emp.hire_date),
                       },
                     ].map((row, j) => (
                       <div key={j} style={s.detailRow}>
@@ -631,7 +637,7 @@ export default function EmployeeListPage() {
                         />
                         <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" />
                       </svg>
-                      عرض
+                      {t("employees.view")}
                     </button>
                     <button
                       className="action-btn"
@@ -652,7 +658,7 @@ export default function EmployeeListPage() {
                           strokeLinecap="round"
                         />
                       </svg>
-                      تعديل
+                      {t("employees.edit")}
                     </button>
                     <button
                       className="action-btn"
@@ -680,7 +686,7 @@ export default function EmployeeListPage() {
                           strokeLinecap="round"
                         />
                       </svg>
-                      {deleting === emp.id ? "..." : "حذف"}
+                      {deleting === emp.id ? "..." : t("employees.delete")}
                     </button>
                   </div>
                 </div>
@@ -698,7 +704,7 @@ export default function EmployeeListPage() {
                 onClick={() => handlePageChange(page - 1)}
                 disabled={page <= 1}
               >
-                السابق
+                {t("employees.previous")}
               </button>
 
               {Array.from({ length: pagination.last_page }, (_, i) => i + 1).map((pageNumber) => (
@@ -711,7 +717,7 @@ export default function EmployeeListPage() {
                   }}
                   onClick={() => handlePageChange(pageNumber)}
                 >
-                  {pageNumber}
+                  {formatNumber(pageNumber)}
                 </button>
               ))}
 
@@ -724,7 +730,7 @@ export default function EmployeeListPage() {
                 onClick={() => handlePageChange(page + 1)}
                 disabled={page >= pagination.last_page}
               >
-                التالي
+                {t("employees.next")}
               </button>
             </div>
           )}

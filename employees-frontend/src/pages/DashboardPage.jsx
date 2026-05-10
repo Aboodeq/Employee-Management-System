@@ -2,8 +2,10 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { getAllEmployees } from "../api/employeeApi";
+import { useI18n } from "../i18n/i18n";
 
 export default function DashboardPage() {
+  const { dir, formatDate, formatNumber, t } = useI18n();
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -21,9 +23,9 @@ export default function DashboardPage() {
 
   const stats = [
     {
-      label: "إجمالي الموظفين",
-      value: loading ? "..." : employees.length,
-      sub: "موظف مسجل",
+      label: t("dashboard.stats.totalEmployees"),
+      value: loading ? "..." : formatNumber(employees.length),
+      sub: t("dashboard.stats.registeredEmployees"),
       color: "#2563eb",
       bg: "#eff6ff",
       icon: (
@@ -45,9 +47,9 @@ export default function DashboardPage() {
       ),
     },
     {
-      label: "إجمالي الرواتب",
-      value: loading ? "..." : `${totalSalaries.toLocaleString()}`,
-      sub: "ل.س شهرياً",
+      label: t("dashboard.stats.totalSalaries"),
+      value: loading ? "..." : formatNumber(totalSalaries),
+      sub: t("dashboard.stats.monthly"),
       color: "#059669",
       bg: "#ecfdf5",
       icon: (
@@ -71,9 +73,9 @@ export default function DashboardPage() {
       ),
     },
     {
-      label: "المسميات الوظيفية",
-      value: loading ? "..." : positions,
-      sub: "مسمى مختلف",
+      label: t("dashboard.stats.positions"),
+      value: loading ? "..." : formatNumber(positions),
+      sub: t("dashboard.stats.differentPosition"),
       color: "#7c3aed",
       bg: "#f5f3ff",
       icon: (
@@ -89,13 +91,13 @@ export default function DashboardPage() {
       ),
     },
     {
-      label: "آخر إضافة",
+      label: t("dashboard.stats.latestAddition"),
       value: loading
         ? "..."
         : employees.length > 0
-          ? new Date(employees[0].created_at).toLocaleDateString("en-GB")
-          : "—",
-      sub: "تاريخ آخر موظف",
+          ? formatDate(employees[0].created_at)
+          : t("common.notAvailable"),
+      sub: t("dashboard.stats.latestEmployeeDate"),
       color: "#d97706",
       bg: "#fffbeb",
       icon: (
@@ -126,7 +128,7 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="dashboard-page" style={s.page}>
+    <div className="dashboard-page" style={{ ...s.page, direction: dir }} dir={dir}>
       <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap');
                 @keyframes fadeUp {
@@ -219,9 +221,9 @@ export default function DashboardPage() {
         <div className="dashboard-header" style={s.header}>
           <div>
             <h1 className="dashboard-title" style={s.pageTitle}>
-              لوحة التحكم
+              {t("common.dashboard")}
             </h1>
-            <p style={s.pageSub}>مرحباً بك — هذا ملخص النظام</p>
+            <p style={s.pageSub}>{t("dashboard.subtitle")}</p>
           </div>
           <button className="dashboard-add-btn" style={s.addBtn} onClick={() => navigate("/employees/add")}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -244,7 +246,7 @@ export default function DashboardPage() {
                 strokeLinecap="round"
               />
             </svg>
-            إضافة موظف
+            {t("dashboard.addEmployee")}
           </button>
         </div>
 
@@ -275,10 +277,10 @@ export default function DashboardPage() {
           <div style={s.tableCard}>
             <div className="dashboard-table-header" style={s.tableHeader}>
               <h2 className="dashboard-section-title" style={s.sectionTitle}>
-                آخر الموظفين المضافين
+                {t("dashboard.recentEmployees")}
               </h2>
               <button className="dashboard-view-all" style={s.viewAll} onClick={() => navigate("/employees")}>
-                عرض الكل
+                {t("dashboard.viewAll")}
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                   <path
                     d="M15 18l-6-6 6-6"
@@ -291,18 +293,18 @@ export default function DashboardPage() {
             </div>
 
             {loading ? (
-              <div style={s.emptyState}>جاري التحميل...</div>
+              <div style={s.emptyState}>{t("common.loading")}</div>
             ) : employees.length === 0 ? (
-              <div style={s.emptyState}>لا يوجد موظفون بعد</div>
+              <div style={s.emptyState}>{t("dashboard.noEmployees")}</div>
             ) : (
               <div className="dashboard-table-scroll" style={s.tableScroll}>
                 <table className="dashboard-table" style={s.table}>
                   <thead>
                     <tr style={s.thead}>
-                      <th style={s.th}>الاسم</th>
-                      <th style={s.th}>المسمى</th>
-                      <th style={s.th}>الراتب</th>
-                      <th style={s.th}>تاريخ التعيين</th>
+                      <th style={s.th}>{t("dashboard.table.name")}</th>
+                      <th style={s.th}>{t("dashboard.table.position")}</th>
+                      <th style={s.th}>{t("dashboard.table.salary")}</th>
+                      <th style={s.th}>{t("dashboard.table.hireDate")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -343,12 +345,12 @@ export default function DashboardPage() {
                         </td>
                         <td style={s.td}>
                           <span style={s.salary}>
-                            {parseFloat(emp.salary).toLocaleString()} ل.س
+                            {formatNumber(parseFloat(emp.salary))} {t("common.syp")}
                           </span>
                         </td>
                         <td style={s.td}>
                           <span style={s.date}>
-                            {new Date(emp.hire_date).toLocaleDateString("en-GB")}
+                            {formatDate(emp.hire_date)}
                           </span>
                         </td>
                       </tr>
@@ -362,13 +364,13 @@ export default function DashboardPage() {
           {/* Quick actions */}
           <div className="dashboard-quick-card" style={s.quickCard}>
             <h2 className="dashboard-section-title" style={s.sectionTitle}>
-              إجراءات سريعة
+              {t("dashboard.quickActions")}
             </h2>
             <div style={s.quickList}>
               {[
                 {
-                  label: "إضافة موظف جديد",
-                  sub: "أضف بيانات موظف للنظام",
+                  label: t("dashboard.quickAddLabel"),
+                  sub: t("dashboard.quickAddSub"),
                   path: "/employees/add",
                   icon: (
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -401,8 +403,8 @@ export default function DashboardPage() {
                   ),
                 },
                 {
-                  label: "قائمة الموظفين",
-                  sub: "عرض وإدارة جميع الموظفين",
+                  label: t("dashboard.quickListLabel"),
+                  sub: t("dashboard.quickListSub"),
                   path: "/employees",
                   icon: (
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none">

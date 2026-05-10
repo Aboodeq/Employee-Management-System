@@ -1,3 +1,5 @@
+import { getStoredLanguage } from "../i18n/i18nStorage";
+
 const BASE_URL = "http://127.0.0.1:8000/api";
 const TOKEN_KEY = "ems_auth_token";
 
@@ -22,6 +24,7 @@ const apiFetch = async (path, options = {}) => {
   const isFormData = options.body instanceof FormData;
   const headers = {
     Accept: "application/json",
+    "X-Locale": getStoredLanguage(),
     ...(isFormData ? {} : { "Content-Type": "application/json" }),
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...(options.headers || {}),

@@ -1,3 +1,5 @@
+import { useI18n } from "../i18n/i18n";
+
 export default function DeleteConfirmModal({
   open,
   employeeName,
@@ -5,11 +7,14 @@ export default function DeleteConfirmModal({
   onCancel,
   onConfirm,
 }) {
+  const { dir, t } = useI18n();
+
   if (!open) return null;
 
   return (
     <div
-      style={s.overlay}
+      style={{ ...s.overlay, direction: dir }}
+      dir={dir}
       role="presentation"
       onClick={() => {
         if (!loading) onCancel();
@@ -57,23 +62,23 @@ export default function DeleteConfirmModal({
         </div>
 
         <h2 id="delete-confirm-title" style={s.title}>
-          تأكيد حذف الموظف
+          {t("deleteModal.title")}
         </h2>
-        <p style={s.text}>سيتم حذف بيانات الموظف نهائياً من قاعدة البيانات.</p>
-        <div style={s.nameBox}>{employeeName || "هذا الموظف"}</div>
+        <p style={s.text}>{t("deleteModal.text")}</p>
+        <div style={s.nameBox}>{employeeName || t("deleteModal.fallbackEmployee")}</div>
 
         <div style={s.actions}>
           <button type="button" style={s.cancelBtn} onClick={onCancel} disabled={loading}>
-            إلغاء
+            {t("common.cancel")}
           </button>
           <button type="button" style={s.deleteBtn} onClick={onConfirm} disabled={loading}>
             {loading ? (
               <>
                 <span style={s.spinner} />
-                جاري الحذف...
+                {t("common.deleting")}
               </>
             ) : (
-              "نعم، حذف"
+              t("common.yesDelete")
             )}
           </button>
         </div>

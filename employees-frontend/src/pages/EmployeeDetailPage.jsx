@@ -3,10 +3,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import DeleteConfirmModal from "../components/DeleteConfirmModal";
 import { getEmployee, deleteEmployee } from "../api/employeeApi";
+import { useAuth } from "../context/authContextValue";
 import { useI18n } from "../i18n/i18n";
 
 export default function EmployeeDetailPage() {
   const { dir, formatDate, formatNumber, t } = useI18n();
+  const { can } = useAuth();
   const { id } = useParams();
   const navigate = useNavigate();
   const [employee, setEmployee] = useState(null);
@@ -14,6 +16,8 @@ export default function EmployeeDetailPage() {
   const [deleting, setDeleting] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [toast, setToast] = useState(null);
+  const canUpdateEmployees = can("employees.update");
+  const canDeleteEmployees = can("employees.delete");
 
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
@@ -35,14 +39,14 @@ export default function EmployeeDetailPage() {
     try {
       const res = await deleteEmployee(id);
       if (!res.success) {
-        throw new Error("Failed to delete employee");
+        throw new Error(res.message || t("detail.deleteError"));
       }
 
       setDeleteConfirmOpen(false);
       showToast(t("detail.deleteSuccess"));
       setTimeout(() => navigate("/employees"), 1200);
-    } catch {
-      showToast(t("detail.deleteError"), "error");
+    } catch (error) {
+      showToast(error.message || t("detail.deleteError"), "error");
       setDeleting(false);
     }
   };
@@ -409,57 +413,63 @@ export default function EmployeeDetailPage() {
               </div>
 
               {/* Actions */}
-              <div className="employee-actions" style={s.profileActions}>
-                <button
-                  className="edit-btn"
-                  style={s.editBtn}
-                  onClick={() => navigate(`/employees/edit/${employee.id}`)}
-                >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
-                      stroke="#fff"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-                    <path
-                      d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
-                      stroke="#fff"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                  {t("detail.editData")}
-                </button>
-                <button
-                  className="del-btn"
-                  style={{ ...s.deleteBtn, opacity: deleting ? 0.7 : 1 }}
-                  onClick={() => setDeleteConfirmOpen(true)}
-                  disabled={deleting}
-                >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-                    <polyline
-                      points="3 6 5 6 21 6"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-                    <path
-                      d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-                    <path
-                      d="M10 11v6M14 11v6"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                  {deleting ? t("common.deleting") : t("detail.deleteEmployee")}
-                </button>
-              </div>
+              {(canUpdateEmployees || canDeleteEmployees) && (
+                <div className="employee-actions" style={s.profileActions}>
+                  {canUpdateEmployees && (
+                    <button
+                      className="edit-btn"
+                      style={s.editBtn}
+                      onClick={() => navigate(`/employees/edit/${employee.id}`)}
+                    >
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                        <path
+                          d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+                          stroke="#fff"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                        />
+                        <path
+                          d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+                          stroke="#fff"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                      {t("detail.editData")}
+                    </button>
+                  )}
+                  {canDeleteEmployees && (
+                    <button
+                      className="del-btn"
+                      style={{ ...s.deleteBtn, opacity: deleting ? 0.7 : 1 }}
+                      onClick={() => setDeleteConfirmOpen(true)}
+                      disabled={deleting}
+                    >
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                        <polyline
+                          points="3 6 5 6 21 6"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                        />
+                        <path
+                          d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                        />
+                        <path
+                          d="M10 11v6M14 11v6"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                      {deleting ? t("common.deleting") : t("detail.deleteEmployee")}
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 

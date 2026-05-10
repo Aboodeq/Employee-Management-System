@@ -100,7 +100,7 @@ export default function EditEmployeePage() {
         setTimeout(() => navigate(`/employees/${id}`), 1200);
       } else {
         setErrors(res.errors || {});
-        showToast(firstEmployeeError(res.errors || {}, t), "error");
+        showToast(res.message || firstEmployeeError(res.errors || {}, t), "error");
       }
     } catch {
       showToast(t("form.serverUnavailable"), "error");

@@ -52,6 +52,12 @@ export const loginAdmin = async (username, password) =>
 
 export const getCurrentUser = async () => apiFetch("/me");
 
+export const updateProfile = async (data) =>
+  apiFetch("/profile", {
+    method: data instanceof FormData ? "POST" : "PUT",
+    body: data instanceof FormData ? data : JSON.stringify(data),
+  });
+
 export const logoutAdmin = async () =>
   apiFetch("/logout", {
     method: "POST",
@@ -91,5 +97,24 @@ export const updateEmployee = async (id, data) =>
 
 export const deleteEmployee = async (id) =>
   apiFetch(`/employees/${id}`, {
+    method: "DELETE",
+  });
+
+export const getUsers = async () => apiFetch("/users");
+
+export const createUser = async (data) =>
+  apiFetch("/users", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+
+export const updateUser = async (id, data) =>
+  apiFetch(`/users/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+
+export const deleteUser = async (id) =>
+  apiFetch(`/users/${id}`, {
     method: "DELETE",
   });

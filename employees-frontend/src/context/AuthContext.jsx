@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   clearAuthToken,
   getAuthToken,
@@ -16,30 +16,61 @@ export const AuthProvider = ({ children }) => {
   const [authLoading, setAuthLoading] = useState(Boolean(getAuthToken()));
   const [user, setUser] = useState(null);
 
-  useEffect(() => {
+  const permissions = useMemo(() => user?.permissions || [], [user]);
+  const role = user?.role || "viewer";
+
+  const can = useCallback(
+    (permission) => permissions.includes(permission),
+    [permissions],
+  );
+
+  const resetAuth = useCallback(() => {
+    clearAuthToken();
+    setUser(null);
+    setIsAuthenticated(false);
+  }, []);
+
+  const refreshUser = useCallback(async () => {
     if (!getAuthToken()) {
-      clearAuthToken();
-      return;
+      resetAuth();
+      return null;
     }
 
-    getCurrentUser()
-      .then((res) => {
-        if (res.success) {
-          setUser(res.user);
-          setIsAuthenticated(true);
-        } else {
-          clearAuthToken();
-          setUser(null);
-          setIsAuthenticated(false);
-        }
-      })
-      .catch(() => {
-        clearAuthToken();
-        setUser(null);
-        setIsAuthenticated(false);
-      })
-      .finally(() => setAuthLoading(false));
-  }, []);
+    try {
+      const res = await getCurrentUser();
+      if (res.success) {
+        setUser(res.user);
+        setIsAuthenticated(true);
+        return res.user;
+      }
+
+      resetAuth();
+      return null;
+    } catch {
+      resetAuth();
+      return null;
+    }
+  }, [resetAuth]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    Promise.resolve().then(() => {
+      if (!getAuthToken()) {
+        resetAuth();
+        if (isMounted) setAuthLoading(false);
+        return;
+      }
+
+      refreshUser().finally(() => {
+        if (isMounted) setAuthLoading(false);
+      });
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [refreshUser, resetAuth]);
 
   const login = async (username, password, remember = true) => {
     const res = await loginAdmin(username, password);
@@ -63,13 +94,23 @@ export const AuthProvider = ({ children }) => {
       await logoutAdmin().catch(() => null);
     }
 
-    clearAuthToken();
-    setUser(null);
-    setIsAuthenticated(false);
+    resetAuth();
   };
 
   return (
-    <AuthContext.Provider value={{ authLoading, isAuthenticated, login, logout, user }}>
+    <AuthContext.Provider
+      value={{
+        authLoading,
+        can,
+        isAuthenticated,
+        login,
+        logout,
+        permissions,
+        refreshUser,
+        role,
+        user,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

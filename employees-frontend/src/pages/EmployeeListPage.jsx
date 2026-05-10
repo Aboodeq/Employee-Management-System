@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import DeleteConfirmModal from "../components/DeleteConfirmModal";
 import { getAllEmployees, deleteEmployee, getEmployeeFilterOptions } from "../api/employeeApi";
+import { useAuth } from "../context/authContextValue";
 import { useI18n } from "../i18n/i18n";
 
 const PAGE_SIZE = 12;
@@ -17,6 +18,7 @@ const initialFilters = {
 
 export default function EmployeeListPage() {
   const { dir, formatDate, formatNumber, t } = useI18n();
+  const { can } = useAuth();
   const [employees, setEmployees] = useState([]);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -36,6 +38,10 @@ export default function EmployeeListPage() {
   const [pendingDelete, setPendingDelete] = useState(null);
   const [toast, setToast] = useState(null);
   const navigate = useNavigate();
+  const canCreateEmployees = can("employees.create");
+  const canUpdateEmployees = can("employees.update");
+  const canDeleteEmployees = can("employees.delete");
+  const actionColumns = 1 + Number(canUpdateEmployees) + Number(canDeleteEmployees);
 
   const showToast = useCallback((msg, type = "success") => {
     setToast({ msg, type });
@@ -136,7 +142,7 @@ export default function EmployeeListPage() {
     try {
       const res = await deleteEmployee(id);
       if (!res.success) {
-        throw new Error("Failed to delete employee");
+        throw new Error(res.message || t("employees.deleteError"));
       }
 
       setPendingDelete(null);
@@ -148,8 +154,8 @@ export default function EmployeeListPage() {
         setLoading(true);
         fetchEmployees(page);
       }
-    } catch {
-      showToast(t("employees.deleteError"), "error");
+    } catch (error) {
+      showToast(error.message || t("employees.deleteError"), "error");
     } finally {
       setDeleting(null);
     }
@@ -302,29 +308,31 @@ export default function EmployeeListPage() {
                   })}
             </p>
           </div>
-          <button className="employees-add-btn" style={s.addBtn} onClick={() => navigate("/employees/add")}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <line
-                x1="12"
-                y1="5"
-                x2="12"
-                y2="19"
-                stroke="#fff"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-              />
-              <line
-                x1="5"
-                y1="12"
-                x2="19"
-                y2="12"
-                stroke="#fff"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-              />
-            </svg>
-            {t("employees.addEmployee")}
-          </button>
+          {canCreateEmployees && (
+            <button className="employees-add-btn" style={s.addBtn} onClick={() => navigate("/employees/add")}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <line
+                  x1="12"
+                  y1="5"
+                  x2="12"
+                  y2="19"
+                  stroke="#fff"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+                <line
+                  x1="5"
+                  y1="12"
+                  x2="19"
+                  y2="12"
+                  stroke="#fff"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+              </svg>
+              {t("employees.addEmployee")}
+            </button>
+          )}
         </div>
 
         <div className="employees-search" style={s.searchWrap}>
@@ -474,7 +482,7 @@ export default function EmployeeListPage() {
             <p style={s.emptySub}>
               {hasActiveFilters ? t("employees.emptyFiltered") : t("employees.emptyAddFirst")}
             </p>
-            {!hasActiveFilters && (
+            {!hasActiveFilters && canCreateEmployees && (
               <button style={s.emptyBtn} onClick={() => navigate("/employees/add")}>
                 {t("employees.addEmployee")}
               </button>
@@ -623,7 +631,10 @@ export default function EmployeeListPage() {
                     ))}
                   </div>
 
-                  <div className="employees-card-actions" style={s.cardActions}>
+                  <div
+                    className="employees-card-actions"
+                    style={{ ...s.cardActions, gridTemplateColumns: `repeat(${actionColumns}, 1fr)` }}
+                  >
                     <button
                       className="action-btn"
                       style={s.viewBtn}
@@ -639,55 +650,59 @@ export default function EmployeeListPage() {
                       </svg>
                       {t("employees.view")}
                     </button>
-                    <button
-                      className="action-btn"
-                      style={s.editBtn}
-                      onClick={() => navigate(`/employees/edit/${emp.id}`)}
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                        <path
-                          d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                        />
-                        <path
-                          d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                      {t("employees.edit")}
-                    </button>
-                    <button
-                      className="action-btn"
-                      style={{ ...s.deleteBtn, opacity: deleting === emp.id ? 0.6 : 1 }}
-                      onClick={() => requestDelete(emp.id, emp.name)}
-                      disabled={deleting === emp.id}
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                        <polyline
-                          points="3 6 5 6 21 6"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                        />
-                        <path
-                          d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                        />
-                        <path
-                          d="M10 11v6M14 11v6"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                      {deleting === emp.id ? "..." : t("employees.delete")}
-                    </button>
+                    {canUpdateEmployees && (
+                      <button
+                        className="action-btn"
+                        style={s.editBtn}
+                        onClick={() => navigate(`/employees/edit/${emp.id}`)}
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                          <path
+                            d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                          />
+                          <path
+                            d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                        {t("employees.edit")}
+                      </button>
+                    )}
+                    {canDeleteEmployees && (
+                      <button
+                        className="action-btn"
+                        style={{ ...s.deleteBtn, opacity: deleting === emp.id ? 0.6 : 1 }}
+                        onClick={() => requestDelete(emp.id, emp.name)}
+                        disabled={deleting === emp.id}
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                          <polyline
+                            points="3 6 5 6 21 6"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                          />
+                          <path
+                            d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                          />
+                          <path
+                            d="M10 11v6M14 11v6"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                        {deleting === emp.id ? "..." : t("employees.delete")}
+                      </button>
+                    )}
                   </div>
                 </div>
               );

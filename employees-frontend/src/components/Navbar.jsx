@@ -5,7 +5,7 @@ import { useI18n } from "../i18n/i18n";
 
 export default function Navbar() {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { can, logout, role } = useAuth();
   const { dir, t, toggleLanguage } = useI18n();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -73,7 +73,7 @@ export default function Navbar() {
               <p className="app-nav-title" style={s.title}>
                 {t("common.appName")}
               </p>
-              <p style={s.subtitle}>{t("common.adminDashboard")}</p>
+              <p style={s.subtitle}>{t(`common.roleSubtitle.${role || "viewer"}`)}</p>
             </div>
           </div>
 
@@ -160,6 +160,24 @@ export default function Navbar() {
           >
             {t("common.employees")}
           </NavLink>
+          <NavLink
+            className="app-nav-link"
+            to="/profile"
+            style={({ isActive }) => linkStyle(isActive)}
+            onClick={() => setMenuOpen(false)}
+          >
+            {t("common.profile")}
+          </NavLink>
+          {can("users.manage") && (
+            <NavLink
+              className="app-nav-link"
+              to="/users"
+              style={({ isActive }) => linkStyle(isActive)}
+              onClick={() => setMenuOpen(false)}
+            >
+              {t("common.users")}
+            </NavLink>
+          )}
           <button
             type="button"
             className="app-nav-logout"

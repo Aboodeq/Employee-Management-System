@@ -2,10 +2,12 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { getAllEmployees } from "../api/employeeApi";
+import { useAuth } from "../context/authContextValue";
 import { useI18n } from "../i18n/i18n";
 
 export default function DashboardPage() {
   const { dir, formatDate, formatNumber, t } = useI18n();
+  const { can } = useAuth();
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -20,6 +22,7 @@ export default function DashboardPage() {
   const totalSalaries = employees.reduce((s, e) => s + parseFloat(e.salary || 0), 0);
   const positions = [...new Set(employees.map((e) => e.position))].length;
   const latest = [...employees].slice(0, 5);
+  const canCreateEmployees = can("employees.create");
 
   const stats = [
     {
@@ -225,29 +228,31 @@ export default function DashboardPage() {
             </h1>
             <p style={s.pageSub}>{t("dashboard.subtitle")}</p>
           </div>
-          <button className="dashboard-add-btn" style={s.addBtn} onClick={() => navigate("/employees/add")}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <line
-                x1="12"
-                y1="5"
-                x2="12"
-                y2="19"
-                stroke="#fff"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-              />
-              <line
-                x1="5"
-                y1="12"
-                x2="19"
-                y2="12"
-                stroke="#fff"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-              />
-            </svg>
-            {t("dashboard.addEmployee")}
-          </button>
+          {canCreateEmployees && (
+            <button className="dashboard-add-btn" style={s.addBtn} onClick={() => navigate("/employees/add")}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <line
+                  x1="12"
+                  y1="5"
+                  x2="12"
+                  y2="19"
+                  stroke="#fff"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+                <line
+                  x1="5"
+                  y1="12"
+                  x2="19"
+                  y2="12"
+                  stroke="#fff"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+              </svg>
+              {t("dashboard.addEmployee")}
+            </button>
+          )}
         </div>
 
         {/* Stats */}
@@ -368,40 +373,44 @@ export default function DashboardPage() {
             </h2>
             <div style={s.quickList}>
               {[
-                {
-                  label: t("dashboard.quickAddLabel"),
-                  sub: t("dashboard.quickAddSub"),
-                  path: "/employees/add",
-                  icon: (
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                      <path
-                        d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                      />
-                      <circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="2" />
-                      <line
-                        x1="19"
-                        y1="8"
-                        x2="19"
-                        y2="14"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                      />
-                      <line
-                        x1="22"
-                        y1="11"
-                        x2="16"
-                        y2="11"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                  ),
-                },
+                ...(canCreateEmployees
+                  ? [
+                      {
+                        label: t("dashboard.quickAddLabel"),
+                        sub: t("dashboard.quickAddSub"),
+                        path: "/employees/add",
+                        icon: (
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                            <path
+                              d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                            />
+                            <circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="2" />
+                            <line
+                              x1="19"
+                              y1="8"
+                              x2="19"
+                              y2="14"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                            />
+                            <line
+                              x1="22"
+                              y1="11"
+                              x2="16"
+                              y2="11"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                            />
+                          </svg>
+                        ),
+                      },
+                    ]
+                  : []),
                 {
                   label: t("dashboard.quickListLabel"),
                   sub: t("dashboard.quickListSub"),

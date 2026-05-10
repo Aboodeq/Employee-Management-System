@@ -8,8 +8,10 @@ import {
   setAuthToken,
 } from "../api/employeeApi";
 import { AuthContext } from "./authContextValue";
+import { useI18n } from "../i18n/i18n";
 
 export const AuthProvider = ({ children }) => {
+  const { t } = useI18n();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authLoading, setAuthLoading] = useState(Boolean(getAuthToken()));
   const [user, setUser] = useState(null);
@@ -51,7 +53,7 @@ export const AuthProvider = ({ children }) => {
 
     return {
       success: false,
-      message: res.message || "Invalid username or password.",
+      message: res.message || t("login.invalidCredentials"),
       errors: res.errors || {},
     };
   };

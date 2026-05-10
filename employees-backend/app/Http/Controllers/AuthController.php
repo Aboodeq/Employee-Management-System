@@ -15,7 +15,7 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'username' => ['required', 'string'],
             'password' => ['required', 'string'],
-        ]);
+        ], trans('messages.validation.auth'));
 
         if ($validator->fails()) {
             return response()->json([
@@ -29,7 +29,7 @@ class AuthController extends Controller
         if (! $user || ! Hash::check($request->password, $user->password)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Invalid username or password.',
+                'message' => __('messages.auth.invalid_credentials'),
             ], 401);
         }
 
@@ -56,7 +56,7 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Logged out successfully.',
+            'message' => __('messages.auth.logged_out'),
         ]);
     }
 

@@ -111,7 +111,7 @@ class EmployeeController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Employee created successfully.',
+            'message' => __('messages.employees.created'),
             'data' => $employee,
         ], 201);
     }
@@ -151,7 +151,7 @@ class EmployeeController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Employee updated successfully.',
+            'message' => __('messages.employees.updated'),
             'data' => $employee->fresh(),
         ]);
     }
@@ -166,7 +166,7 @@ class EmployeeController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Employee deleted successfully.',
+            'message' => __('messages.employees.deleted'),
         ]);
     }
 
@@ -223,21 +223,7 @@ class EmployeeController extends Controller
 
     private function filterMessages(): array
     {
-        return [
-            'search.max' => 'كلمة البحث طويلة جداً',
-            'position.max' => 'المسمى الوظيفي طويل جداً',
-            'salary_min.numeric' => 'الحد الأدنى للراتب يجب أن يكون رقماً',
-            'salary_min.min' => 'الحد الأدنى للراتب يجب ألا يكون سالباً',
-            'salary_max.numeric' => 'الحد الأعلى للراتب يجب أن يكون رقماً',
-            'salary_max.min' => 'الحد الأعلى للراتب يجب ألا يكون سالباً',
-            'hire_from.date' => 'تاريخ البداية غير صحيح',
-            'hire_to.date' => 'تاريخ النهاية غير صحيح',
-            'page.integer' => 'رقم الصفحة غير صحيح',
-            'page.min' => 'رقم الصفحة غير صحيح',
-            'per_page.integer' => 'عدد العناصر في الصفحة غير صحيح',
-            'per_page.min' => 'عدد العناصر في الصفحة غير صحيح',
-            'per_page.max' => 'لا يمكن عرض أكثر من 50 موظفاً في الصفحة',
-        ];
+        return trans('messages.validation.filters');
     }
 
     private function employeeInput(Request $request): array
@@ -259,33 +245,7 @@ class EmployeeController extends Controller
 
     private function messages(): array
     {
-        return [
-            'name.required' => 'الاسم الكامل مطلوب',
-            'name.min' => 'الاسم يجب أن يحتوي على حرفين على الأقل',
-            'name.max' => 'الاسم يجب ألا يتجاوز 120 حرفاً',
-            'name.regex' => 'الاسم يجب أن يحتوي على أحرف ومسافات فقط',
-            'email.required' => 'البريد الإلكتروني مطلوب',
-            'email.email' => 'صيغة البريد الإلكتروني غير صحيحة',
-            'email.max' => 'البريد الإلكتروني طويل جداً',
-            'email.unique' => 'هذا البريد الإلكتروني مستخدم مسبقاً',
-            'phone.required' => 'رقم الهاتف مطلوب',
-            'phone.regex' => 'رقم الهاتف يجب أن يبدأ بـ 09 ويتكون من 10 أرقام فقط',
-            'position.required' => 'المسمى الوظيفي مطلوب',
-            'position.min' => 'المسمى الوظيفي قصير جداً',
-            'position.max' => 'المسمى الوظيفي يجب ألا يتجاوز 120 حرفاً',
-            'position.regex' => 'المسمى الوظيفي يحتوي على رموز غير مسموحة',
-            'salary.required' => 'الراتب مطلوب',
-            'salary.numeric' => 'الراتب يجب أن يكون رقماً',
-            'salary.min' => 'الراتب يجب أن يكون أكبر من صفر',
-            'salary.max' => 'الراتب كبير جداً',
-            'hire_date.required' => 'تاريخ التعيين مطلوب',
-            'hire_date.date_format' => 'تاريخ التعيين يجب أن يكون بصيغة صحيحة',
-            'hire_date.after_or_equal' => 'تاريخ التعيين قديم جداً',
-            'hire_date.before_or_equal' => 'تاريخ التعيين لا يمكن أن يكون في المستقبل',
-            'image.image' => 'الملف المختار يجب أن يكون صورة',
-            'image.mimes' => 'الصورة يجب أن تكون JPG أو PNG أو WEBP',
-            'image.max' => 'حجم الصورة يجب ألا يتجاوز 2MB',
-        ];
+        return trans('messages.validation.employee');
     }
 
     private function employeeData(array $validated): array

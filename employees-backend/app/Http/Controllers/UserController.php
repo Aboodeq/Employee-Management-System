@@ -169,6 +169,7 @@ class UserController extends Controller
             'email' => $user->email,
             'role' => Permissions::normalizeRole($user->role),
             'image' => $user->image,
+            'image_url' => $user->image_url,
             'permissions' => Permissions::forRole($user->role),
             'created_at' => $user->created_at,
             'updated_at' => $user->updated_at,

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import DeleteConfirmModal from "../components/DeleteConfirmModal";
-import { getEmployee, deleteEmployee } from "../api/employeeApi";
+import { getEmployee, deleteEmployee, getImageUrl } from "../api/employeeApi";
 import { useAuth } from "../context/authContextValue";
 import { useI18n } from "../i18n/i18n";
 
@@ -82,8 +82,21 @@ export default function EmployeeDetailPage() {
     .join("")
     .slice(0, 2)
     .toUpperCase();
+  const employeeImageUrl = getImageUrl(employee);
 
   const infoRows = [
+    {
+      label: t("detail.fields.department"),
+      value: employee.department?.name || t("common.notAvailable"),
+      icon: (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <rect x="3" y="4" width="18" height="16" rx="2" stroke="#2563eb" strokeWidth="2" />
+          <path d="M9 4V2h6v2" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" />
+        </svg>
+      ),
+      color: "#2563eb",
+      bg: "#eff6ff",
+    },
     {
       label: t("detail.fields.email"),
       value: employee.email,
@@ -117,7 +130,7 @@ export default function EmployeeDetailPage() {
     },
     {
       label: t("detail.fields.position"),
-      value: employee.position,
+      value: employee.job_title?.name || employee.position,
       icon: (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
           <rect x="2" y="7" width="20" height="14" rx="2" stroke="#059669" strokeWidth="2" />
@@ -366,9 +379,9 @@ export default function EmployeeDetailPage() {
 
             {/* Avatar */}
             <div className="employee-avatar" style={s.avatarWrap}>
-              {employee.image ? (
+              {employeeImageUrl ? (
                 <img
-                  src={`http://127.0.0.1:8000/storage/${employee.image}`}
+                  src={employeeImageUrl}
                   alt={employee.name}
                   style={s.avatarImg}
                 />
@@ -383,8 +396,9 @@ export default function EmployeeDetailPage() {
                 {employee.name}
               </h2>
               <span className="employee-position-badge" style={s.positionBadge}>
-                {employee.position}
+                {employee.job_title?.name || employee.position}
               </span>
+              <span style={s.departmentBadge}>{employee.department?.name || t("common.notAvailable")}</span>
 
               <div className="employee-id-badge" style={s.idBadge}>
                 <span style={s.idLabel}>{t("detail.employeeId")}</span>
@@ -667,6 +681,18 @@ const s = {
     fontSize: "13px",
     fontWeight: "700",
     padding: "5px 14px",
+    borderRadius: "8px",
+    width: "fit-content",
+    maxWidth: "100%",
+    textAlign: "center",
+  },
+  departmentBadge: {
+    display: "inline-block",
+    background: "#eff6ff",
+    color: "#2563eb",
+    fontSize: "12px",
+    fontWeight: "700",
+    padding: "4px 12px",
     borderRadius: "8px",
     width: "fit-content",
     maxWidth: "100%",

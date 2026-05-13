@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import { getAllEmployees } from "../api/employeeApi";
+import { getAllEmployees, getEmployeeFilterOptions } from "../api/employeeApi";
 import { useAuth } from "../context/authContextValue";
 import { useI18n } from "../i18n/i18n";
 
@@ -9,18 +9,28 @@ export default function DashboardPage() {
   const { dir, formatDate, formatNumber, t } = useI18n();
   const { can } = useAuth();
   const [employees, setEmployees] = useState([]);
+  const [organizationStats, setOrganizationStats] = useState({ departments: 0, jobTitles: 0 });
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    getAllEmployees()
-      .then((res) => setEmployees(res.data || []))
-      .catch(() => setEmployees([]))
+    Promise.all([getAllEmployees(), getEmployeeFilterOptions()])
+      .then(([employeeRes, optionsRes]) => {
+        setEmployees(employeeRes.data || []);
+        setOrganizationStats({
+          departments: optionsRes.data?.departments?.length || 0,
+          jobTitles: optionsRes.data?.job_titles?.length || 0,
+        });
+      })
+      .catch(() => {
+        setEmployees([]);
+        setOrganizationStats({ departments: 0, jobTitles: 0 });
+      })
       .finally(() => setLoading(false));
   }, []);
 
   const totalSalaries = employees.reduce((s, e) => s + parseFloat(e.salary || 0), 0);
-  const positions = [...new Set(employees.map((e) => e.position))].length;
+  const positions = organizationStats.jobTitles || [...new Set(employees.map((e) => e.position))].length;
   const latest = [...employees].slice(0, 5);
   const canCreateEmployees = can("employees.create");
 
@@ -72,6 +82,19 @@ export default function DashboardPage() {
             strokeWidth="2"
             strokeLinecap="round"
           />
+        </svg>
+      ),
+    },
+    {
+      label: t("dashboard.stats.departments"),
+      value: loading ? "..." : formatNumber(organizationStats.departments),
+      sub: t("dashboard.stats.activeDepartments"),
+      color: "#0891b2",
+      bg: "#ecfeff",
+      icon: (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <rect x="3" y="4" width="18" height="16" rx="2" stroke="#0891b2" strokeWidth="2" />
+          <path d="M9 4V2h6v2" stroke="#0891b2" strokeWidth="2" strokeLinecap="round" />
         </svg>
       ),
     },
@@ -346,7 +369,7 @@ export default function DashboardPage() {
                           </div>
                         </td>
                         <td style={s.td}>
-                          <span style={s.positionBadge}>{emp.position}</span>
+                          <span style={s.positionBadge}>{emp.job_title?.name || emp.position}</span>
                         </td>
                         <td style={s.td}>
                           <span style={s.salary}>
@@ -521,7 +544,7 @@ const s = {
   },
   statsGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(4,1fr)",
+    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
     gap: "16px",
     marginBottom: "28px",
   },

@@ -9,7 +9,11 @@ import EmployeeDetailPage from "./pages/EmployeeDetailPage";
 import AddEmployeePage from "./pages/AddEmployeePage";
 import EditEmployeePage from "./pages/EditEmployeePage";
 import UserManagementPage from "./pages/UserManagementPage";
+import UserFormPage from "./pages/UserFormPage";
 import ProfilePage from "./pages/ProfilePage";
+import OrganizationPage from "./pages/OrganizationPage";
+import DepartmentFormPage from "./pages/DepartmentFormPage";
+import JobTitleFormPage from "./pages/JobTitleFormPage";
 
 const ProtectedRoute = ({ children, permission }) => {
   const { authLoading, can, isAuthenticated } = useAuth();
@@ -76,6 +80,69 @@ function AppRoutes() {
         element={
           <ProtectedRoute permission="users.manage">
             <UserManagementPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/users/add"
+        element={
+          <ProtectedRoute permission="users.manage">
+            <UserFormPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/users/edit/:id"
+        element={
+          <ProtectedRoute permission="users.manage">
+            <UserFormPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/organization"
+        element={
+          <ProtectedRoute permission="organization.manage">
+            <OrganizationPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/organization/departments/add"
+        element={
+          <ProtectedRoute permission="organization.manage">
+            <DepartmentFormPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/organization/departments/edit/:id"
+        element={
+          <ProtectedRoute permission="organization.manage">
+            <DepartmentFormPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/organization/job-titles/add"
+        element={
+          <ProtectedRoute permission="organization.manage">
+            <JobTitleFormPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/organization/job-titles/edit/:id"
+        element={
+          <ProtectedRoute permission="organization.manage">
+            <JobTitleFormPage />
           </ProtectedRoute>
         }
       />

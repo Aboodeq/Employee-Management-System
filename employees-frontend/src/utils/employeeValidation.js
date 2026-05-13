@@ -3,7 +3,6 @@ import { translate } from "../i18n/i18n";
 const phoneRegex = /^09\d{8}$/;
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const nameRegex = /^[\p{L}\s'.-]+$/u;
-const positionRegex = /^[\p{L}\p{N}\s&+.,#/()-]+$/u;
 const allowedImageTypes = ["image/jpeg", "image/png", "image/webp"];
 const earliestHireDate = "1990-01-01";
 
@@ -20,7 +19,6 @@ export const validateEmployeeForm = (form, t = translate) => {
   const name = form.name.trim();
   const email = form.email.trim();
   const phone = form.phone.trim();
-  const position = form.position.trim();
   const salary = Number(form.salary);
   const today = todayDateInputValue();
 
@@ -36,10 +34,8 @@ export const validateEmployeeForm = (form, t = translate) => {
   if (!phone) errors.phone = t("validation.phoneRequired");
   else if (!phoneRegex.test(phone)) errors.phone = t("validation.phoneInvalid");
 
-  if (!position) errors.position = t("validation.positionRequired");
-  else if (position.length < 2) errors.position = t("validation.positionMin");
-  else if (position.length > 120) errors.position = t("validation.positionMax");
-  else if (!positionRegex.test(position)) errors.position = t("validation.positionRegex");
+  if (!form.department_id) errors.department_id = t("validation.departmentRequired");
+  if (!form.job_title_id) errors.job_title_id = t("validation.jobTitleRequired");
 
   if (form.salary === "") errors.salary = t("validation.salaryRequired");
   else if (!Number.isFinite(salary) || salary <= 0) errors.salary = t("validation.salaryInvalid");

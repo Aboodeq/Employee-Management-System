@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import EmployeeOrganizationFields from "../components/EmployeeOrganizationFields";
 import Navbar from "../components/Navbar";
-import { getEmployee, updateEmployee } from "../api/employeeApi";
+import { getEmployee, getImageUrl, updateEmployee } from "../api/employeeApi";
 import {
   firstEmployeeError,
   normalizePhone,
@@ -20,6 +21,8 @@ export default function EditEmployeePage() {
     name: "",
     email: "",
     phone: "",
+    department_id: "",
+    job_title_id: "",
     position: "",
     salary: "",
     hire_date: "",
@@ -46,12 +49,14 @@ export default function EditEmployeePage() {
             name: e.name || "",
             email: e.email || "",
             phone: e.phone || "",
+            department_id: e.department_id || e.department?.id || "",
+            job_title_id: e.job_title_id || e.job_title?.id || "",
             position: e.position || "",
             salary: e.salary || "",
             hire_date: e.hire_date || "",
             image: null,
           });
-          if (e.image) setPreview(`http://127.0.0.1:8000/storage/${e.image}`);
+          setPreview(getImageUrl(e) || null);
           setRemoveImage(false);
         }
       })
@@ -157,23 +162,6 @@ export default function EditEmployeePage() {
             d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.27h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.83a16 16 0 0 0 6.26 6.26l1.58-1.95a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"
             stroke="#94a3b8"
             strokeWidth="2"
-          />
-        </svg>
-      ),
-    },
-    {
-      name: "position",
-      label: t("form.fields.position"),
-      type: "text",
-      placeholder: t("form.fields.positionPlaceholder"),
-      icon: (
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-          <rect x="2" y="7" width="20" height="14" rx="2" stroke="#94a3b8" strokeWidth="2" />
-          <path
-            d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"
-            stroke="#94a3b8"
-            strokeWidth="2"
-            strokeLinecap="round"
           />
         </svg>
       ),
@@ -359,6 +347,13 @@ export default function EditEmployeePage() {
           <div className="employee-form-card" style={s.formCard}>
             <form onSubmit={handleSubmit} style={s.form} noValidate>
               <div className="employee-form-fields" style={s.fieldsGrid}>
+                <EmployeeOrganizationFields
+                  errors={errors}
+                  form={form}
+                  setErrors={setErrors}
+                  setForm={setForm}
+                  t={t}
+                />
                 {fields.map((f) => (
                   <div key={f.name} style={s.field}>
                     <label style={s.label}>{f.label}</label>

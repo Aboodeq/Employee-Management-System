@@ -1,10 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import Navbar from "../components/Navbar";
-import { updateProfile } from "../api/employeeApi";
+import { getImageUrl, updateProfile } from "../api/employeeApi";
 import { useAuth } from "../context/authContextValue";
 import { useI18n } from "../i18n/i18n";
-
-const STORAGE_URL = "http://127.0.0.1:8000/storage";
 
 export default function ProfilePage() {
   const { dir, formatDate, t } = useI18n();
@@ -40,7 +38,7 @@ export default function ProfilePage() {
         email: user.email || "",
         image: null,
       }));
-      setPreview(user.image ? `${STORAGE_URL}/${user.image}` : null);
+      setPreview(getImageUrl(user) || null);
       setRemoveImage(false);
     });
 

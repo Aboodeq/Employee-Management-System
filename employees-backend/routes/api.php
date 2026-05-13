@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\JobTitleController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -24,6 +26,19 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/profile', [AuthController::class, 'updateProfile']);
     Route::post('/profile', [AuthController::class, 'updateProfile']);
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    Route::get('/departments', [DepartmentController::class, 'index']);
+    Route::get('/job-titles', [JobTitleController::class, 'index']);
+
+    Route::middleware('permission:organization.manage')->group(function () {
+        Route::post('/departments', [DepartmentController::class, 'store']);
+        Route::put('/departments/{department}', [DepartmentController::class, 'update']);
+        Route::delete('/departments/{department}', [DepartmentController::class, 'destroy']);
+
+        Route::post('/job-titles', [JobTitleController::class, 'store']);
+        Route::put('/job-titles/{jobTitle}', [JobTitleController::class, 'update']);
+        Route::delete('/job-titles/{jobTitle}', [JobTitleController::class, 'destroy']);
+    });
 
     Route::middleware('permission:employees.view')->group(function () {
         Route::get('/employees', [EmployeeController::class, 'index']);

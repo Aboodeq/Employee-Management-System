@@ -2,14 +2,14 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import DeleteConfirmModal from "../components/DeleteConfirmModal";
-import { getAllEmployees, deleteEmployee, getEmployeeFilterOptions } from "../api/employeeApi";
+import { getAllEmployees, deleteEmployee, getEmployeeFilterOptions, getImageUrl } from "../api/employeeApi";
 import { useAuth } from "../context/authContextValue";
 import { useI18n } from "../i18n/i18n";
 
 const PAGE_SIZE = 12;
-const STORAGE_URL = "http://127.0.0.1:8000/storage";
 const initialFilters = {
-  position: "",
+  departmentId: "",
+  jobTitleId: "",
   salaryMin: "",
   salaryMax: "",
   hireFrom: "",
@@ -23,7 +23,8 @@ export default function EmployeeListPage() {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [filters, setFilters] = useState(initialFilters);
-  const [positionOptions, setPositionOptions] = useState([]);
+  const [departmentOptions, setDepartmentOptions] = useState([]);
+  const [jobTitleOptions, setJobTitleOptions] = useState([]);
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({
     current_page: 1,
@@ -42,6 +43,9 @@ export default function EmployeeListPage() {
   const canUpdateEmployees = can("employees.update");
   const canDeleteEmployees = can("employees.delete");
   const actionColumns = 1 + Number(canUpdateEmployees) + Number(canDeleteEmployees);
+  const filteredJobTitleOptions = jobTitleOptions.filter(
+    (item) => String(item.department_id) === String(filters.departmentId),
+  );
 
   const showToast = useCallback((msg, type = "success") => {
     setToast({ msg, type });
@@ -93,7 +97,8 @@ export default function EmployeeListPage() {
     getEmployeeFilterOptions()
       .then((res) => {
         if (isMounted && res.success) {
-          setPositionOptions(res.data?.positions || []);
+          setDepartmentOptions(res.data?.departments || []);
+          setJobTitleOptions(res.data?.job_titles || []);
         }
       })
       .catch(() => null);
@@ -117,7 +122,11 @@ export default function EmployeeListPage() {
   const handleFilterChange = (name, value) => {
     setLoading(true);
     setPage(1);
-    setFilters((current) => ({ ...current, [name]: value }));
+    setFilters((current) =>
+      name === "departmentId"
+        ? { ...current, departmentId: value, jobTitleId: "" }
+        : { ...current, [name]: value },
+    );
   };
 
   const hasActiveFilters = Boolean(search.trim()) || Object.values(filters).some(Boolean);
@@ -132,6 +141,22 @@ export default function EmployeeListPage() {
 
   const requestDelete = (id, name) => {
     setPendingDelete({ id, name });
+  };
+
+  const openEmployee = (id) => {
+    navigate(`/employees/${id}`);
+  };
+
+  const handleCardKeyDown = (event, id) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+
+    event.preventDefault();
+    openEmployee(id);
+  };
+
+  const stopCardClick = (event, action) => {
+    event.stopPropagation();
+    action();
   };
 
   const confirmDelete = async () => {
@@ -177,6 +202,7 @@ export default function EmployeeListPage() {
                 @keyframes slideIn { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
                 @keyframes spin { to { transform: rotate(360deg); } }
                 .emp-card:hover { transform:translateY(-3px); box-shadow:0 12px 36px rgba(0,0,0,0.09) !important; }
+                .emp-card:focus-visible { outline:3px solid rgba(37,99,235,0.24); outline-offset:3px; }
                 .action-btn:hover { opacity:0.8; }
                 .search-input:focus { border-color:#2563eb !important; box-shadow:0 0 0 3px rgba(37,99,235,0.1) !important; background:#fff !important; }
                 .employees-page,
@@ -388,16 +414,35 @@ export default function EmployeeListPage() {
 
         <div className="employees-filters" style={s.filtersBar}>
           <label style={s.filterField}>
-            <span style={s.filterLabel}>{t("employees.filters.position")}</span>
+            <span style={s.filterLabel}>{t("employees.filters.department")}</span>
             <select
               style={s.filterSelect}
-              value={filters.position}
-              onChange={(e) => handleFilterChange("position", e.target.value)}
+              value={filters.departmentId}
+              onChange={(e) => handleFilterChange("departmentId", e.target.value)}
             >
               <option value="">{t("employees.filters.all")}</option>
-              {positionOptions.map((position) => (
-                <option key={position} value={position}>
-                  {position}
+              {departmentOptions.map((department) => (
+                <option key={department.id} value={department.id}>
+                  {department.name}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label style={s.filterField}>
+            <span style={s.filterLabel}>{t("employees.filters.jobTitle")}</span>
+            <select
+              style={s.filterSelect}
+              value={filters.jobTitleId}
+              onChange={(e) => handleFilterChange("jobTitleId", e.target.value)}
+              disabled={!filters.departmentId}
+            >
+              <option value="">
+                {filters.departmentId ? t("employees.filters.all") : t("organization.selectDepartmentFirst")}
+              </option>
+              {filteredJobTitleOptions.map((jobTitle) => (
+                <option key={jobTitle.id} value={jobTitle.id}>
+                  {jobTitle.name}
                 </option>
               ))}
             </select>
@@ -493,17 +538,23 @@ export default function EmployeeListPage() {
           <div className="employees-grid" style={s.grid}>
             {employees.map((emp, i) => {
               const c = colors[i % colors.length];
+              const imageUrl = getImageUrl(emp);
               return (
                 <div
                   key={emp.id}
                   className="emp-card employees-card"
                   style={{ ...s.card, animationDelay: `${i * 0.05}s` }}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`${t("employees.view")} ${emp.name}`}
+                  onClick={() => openEmployee(emp.id)}
+                  onKeyDown={(event) => handleCardKeyDown(event, emp.id)}
                 >
                   <div className="employees-card-top" style={s.cardTop}>
                     <div className="employees-avatar" style={s.cardAvatarFrame}>
-                      {emp.image ? (
+                      {imageUrl ? (
                         <img
-                          src={`${STORAGE_URL}/${emp.image}`}
+                          src={imageUrl}
                           alt={emp.name}
                           style={s.cardAvatarImg}
                         />
@@ -521,7 +572,7 @@ export default function EmployeeListPage() {
                         className="employees-position"
                         style={{ ...s.positionBadge, background: c.bg, color: c.text }}
                       >
-                        {emp.position}
+                        {emp.job_title?.name || emp.position}
                       </span>
                     </div>
                   </div>
@@ -530,6 +581,15 @@ export default function EmployeeListPage() {
 
                   <div style={s.cardDetails}>
                     {[
+                      {
+                        icon: (
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                            <rect x="3" y="4" width="18" height="16" rx="2" stroke="#94a3b8" strokeWidth="2" />
+                            <path d="M9 4V2h6v2" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" />
+                          </svg>
+                        ),
+                        val: emp.department?.name || t("common.notAvailable"),
+                      },
                       {
                         icon: (
                           <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
@@ -638,7 +698,7 @@ export default function EmployeeListPage() {
                     <button
                       className="action-btn"
                       style={s.viewBtn}
-                      onClick={() => navigate(`/employees/${emp.id}`)}
+                      onClick={(event) => stopCardClick(event, () => openEmployee(emp.id))}
                     >
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                         <path
@@ -654,7 +714,7 @@ export default function EmployeeListPage() {
                       <button
                         className="action-btn"
                         style={s.editBtn}
-                        onClick={() => navigate(`/employees/edit/${emp.id}`)}
+                        onClick={(event) => stopCardClick(event, () => navigate(`/employees/edit/${emp.id}`))}
                       >
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                           <path
@@ -677,7 +737,7 @@ export default function EmployeeListPage() {
                       <button
                         className="action-btn"
                         style={{ ...s.deleteBtn, opacity: deleting === emp.id ? 0.6 : 1 }}
-                        onClick={() => requestDelete(emp.id, emp.name)}
+                        onClick={(event) => stopCardClick(event, () => requestDelete(emp.id, emp.name))}
                         disabled={deleting === emp.id}
                       >
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -945,6 +1005,7 @@ const s = {
     flexDirection: "column",
     transition: "all 0.22s",
     animation: "fadeUp 0.4s ease both",
+    cursor: "pointer",
   },
   cardTop: { display: "flex", alignItems: "center", gap: "16px", marginBottom: "18px" },
   cardAvatarFrame: {

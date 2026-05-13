@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Employee;
+use App\Models\JobTitle;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -20,7 +21,7 @@ class EmployeeController extends Controller
         }
 
         $filters = $filterValidator->validated();
-        $query = Employee::query()->latest();
+        $query = Employee::query()->with(['department', 'jobTitle'])->latest();
 
         if ($this->filledFilter($filters, 'search')) {
             $search = trim($filters['search']);
@@ -29,8 +30,18 @@ class EmployeeController extends Controller
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%")
                     ->orWhere('phone', 'like', "%{$search}%")
-                    ->orWhere('position', 'like', "%{$search}%");
+                    ->orWhere('position', 'like', "%{$search}%")
+                    ->orWhereHas('department', fn ($department) => $department->where('name', 'like', "%{$search}%"))
+                    ->orWhereHas('jobTitle', fn ($jobTitle) => $jobTitle->where('name', 'like', "%{$search}%"));
             });
+        }
+
+        if ($this->filledFilter($filters, 'department_id')) {
+            $query->where('department_id', (int) $filters['department_id']);
+        }
+
+        if ($this->filledFilter($filters, 'job_title_id')) {
+            $query->where('job_title_id', (int) $filters['job_title_id']);
         }
 
         if ($this->filledFilter($filters, 'position')) {
@@ -87,6 +98,16 @@ class EmployeeController extends Controller
                     ->distinct()
                     ->orderBy('position')
                     ->pluck('position'),
+                'departments' => \App\Models\Department::query()
+                    ->where('is_active', true)
+                    ->orderBy('name')
+                    ->get(),
+                'job_titles' => JobTitle::query()
+                    ->with('department')
+                    ->where('is_active', true)
+                    ->whereHas('department', fn ($q) => $q->where('is_active', true))
+                    ->orderBy('name')
+                    ->get(),
                 'salary_min' => Employee::min('salary'),
                 'salary_max' => Employee::max('salary'),
             ],
@@ -96,6 +117,7 @@ class EmployeeController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validator = Validator::make($this->employeeInput($request), $this->rules(), $this->messages());
+        $this->validateOrganizationMatch($validator);
 
         if ($validator->fails()) {
             return $this->validationError($validator);
@@ -112,7 +134,7 @@ class EmployeeController extends Controller
         return response()->json([
             'success' => true,
             'message' => __('messages.employees.created'),
-            'data' => $employee,
+            'data' => $employee->load(['department', 'jobTitle']),
         ], 201);
     }
 
@@ -120,13 +142,14 @@ class EmployeeController extends Controller
     {
         return response()->json([
             'success' => true,
-            'data' => $employee,
+            'data' => $employee->load(['department', 'jobTitle']),
         ]);
     }
 
     public function update(Request $request, Employee $employee): JsonResponse
     {
         $validator = Validator::make($this->employeeInput($request), $this->rules($employee), $this->messages());
+        $this->validateOrganizationMatch($validator);
 
         if ($validator->fails()) {
             return $this->validationError($validator);
@@ -152,7 +175,7 @@ class EmployeeController extends Controller
         return response()->json([
             'success' => true,
             'message' => __('messages.employees.updated'),
-            'data' => $employee->fresh(),
+            'data' => $employee->fresh()->load(['department', 'jobTitle']),
         ]);
     }
 
@@ -183,7 +206,9 @@ class EmployeeController extends Controller
                 Rule::unique('employees', 'email')->ignore($employee?->id),
             ],
             'phone' => ['bail', 'required', 'string', 'regex:/^09[0-9]{8}$/'],
-            'position' => ['bail', 'required', 'string', 'min:2', 'max:120', 'regex:/^[\pL\pN\s&+.,#\/()-]+$/u'],
+            'department_id' => ['bail', 'required', 'integer', 'exists:departments,id'],
+            'job_title_id' => ['bail', 'required', 'integer', 'exists:job_titles,id'],
+            'position' => ['nullable', 'string', 'min:2', 'max:120', 'regex:/^[\pL\pN\s&+.,#\/()-]+$/u'],
             'salary' => ['bail', 'required', 'numeric', 'min:1', 'max:999999999.99'],
             'hire_date' => ['bail', 'required', 'date_format:Y-m-d', 'after_or_equal:1990-01-01', 'before_or_equal:today'],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
@@ -196,6 +221,8 @@ class EmployeeController extends Controller
         return [
             'search' => ['nullable', 'string', 'max:255'],
             'position' => ['nullable', 'string', 'max:255'],
+            'department_id' => ['nullable', 'integer', 'exists:departments,id'],
+            'job_title_id' => ['nullable', 'integer', 'exists:job_titles,id'],
             'salary_min' => ['nullable', 'numeric', 'min:0'],
             'salary_max' => ['nullable', 'numeric', 'min:0'],
             'hire_from' => ['nullable', 'date'],
@@ -207,7 +234,7 @@ class EmployeeController extends Controller
 
     private function hasActiveFilters(array $filters): bool
     {
-        foreach (['search', 'position', 'salary_min', 'salary_max', 'hire_from', 'hire_to'] as $filter) {
+        foreach (['search', 'position', 'department_id', 'job_title_id', 'salary_min', 'salary_max', 'hire_from', 'hire_to'] as $filter) {
             if ($this->filledFilter($filters, $filter)) {
                 return true;
             }
@@ -252,7 +279,32 @@ class EmployeeController extends Controller
     {
         unset($validated['image'], $validated['remove_image']);
 
+        $jobTitle = JobTitle::find($validated['job_title_id']);
+        $validated['position'] = $jobTitle?->name ?? ($validated['position'] ?? '');
+
         return $validated;
+    }
+
+    private function validateOrganizationMatch($validator): void
+    {
+        $validator->after(function ($validator) {
+            $data = $validator->getData();
+
+            if (empty($data['department_id']) || empty($data['job_title_id'])) {
+                return;
+            }
+
+            $matches = JobTitle::query()
+                ->where('id', $data['job_title_id'])
+                ->where('department_id', $data['department_id'])
+                ->where('is_active', true)
+                ->whereHas('department', fn ($q) => $q->where('is_active', true))
+                ->exists();
+
+            if (! $matches) {
+                $validator->errors()->add('job_title_id', __('messages.validation.employee.job_title_id.department_match'));
+            }
+        });
     }
 
     private function validationError($validator): JsonResponse

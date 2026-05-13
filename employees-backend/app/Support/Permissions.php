@@ -14,12 +14,14 @@ class Permissions
             'employees.create',
             'employees.update',
             'employees.delete',
+            'organization.manage',
             'users.manage',
         ],
         self::HR => [
             'employees.view',
             'employees.create',
             'employees.update',
+            'organization.manage',
         ],
         self::VIEWER => [
             'employees.view',
